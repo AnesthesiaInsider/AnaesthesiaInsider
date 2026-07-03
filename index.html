@@ -1704,7 +1704,7 @@ function parseMCQSafe(raw, diff, topic) {
 
       // Continuation lines (e.g. question or explanation spanning multiple lines)
       if (mode === 'q' && trimmed.length > 0) qLines.push(trimmed);
-      else if (mode === 'exp' && trimmed.length > 0) expText = (expText || 'AQ.Ab8RN6IorSHDCVqXaEQg79uVsPO0PoBCUA8KNBUK0wyqnLjjiQ') + ' ' + trimmed;
+      else if (mode === 'exp' && trimmed.length > 0) expText = (expText || '') + ' ' + trimmed;
     }
 
     var qText = qLines.join(' ').trim();
