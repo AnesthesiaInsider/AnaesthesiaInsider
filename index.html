@@ -811,7 +811,7 @@ textarea:disabled { opacity: 0.4; cursor: not-allowed; }
 // ══════════════════════════════════════════
 // GLOBAL STATE
 // ══════════════════════════════════════════
-let API_KEY = sessionStorage.getItem('gemini_key') || 'AQ.Ab8RN6IorSHDCVqXaEQg79uVsPO0PoBCUA8KNBUK0wyqnLjjiQ';
+let API_KEY = sessionStorage.getItem('gemini_key') || '';
 let currentTab = 'home';
 
 function getKey() { return API_KEY; }
@@ -882,7 +882,7 @@ async function callClaude(system, messages) {
       }
       return (data.candidates && data.candidates[0] && data.candidates[0].content &&
               data.candidates[0].content.parts && data.candidates[0].content.parts[0] &&
-              data.candidates[0].content.parts[0].text) || 'AQ.Ab8RN6IorSHDCVqXaEQg79uVsPO0PoBCUA8KNBUK0wyqnLjjiQ';
+              data.candidates[0].content.parts[0].text) || '';
     } catch(err) {
       if (attempt < MAX && err.message.indexOf('API') === -1) {
         await new Promise(function(r){setTimeout(r, DELAYS[attempt]);});
