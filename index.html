@@ -1,1 +1,1804 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AnaesthesiaInsider — Complete Platform</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
+:root {
+  --bg:      #080B10;
+  --surface: #0E1520;
+  --surface2:#0B1018;
+  --border:  #182030;
+  --accent:  #00C2FF;
+  --accent2: #00FFB2;
+  --crisis:  #FF4444;
+  --warn:    #FFB800;
+  --text:    #E8F0F8;
+  --muted:   #4A6A86;
+  --tag-bg:  #0B1825;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg); color: var(--text);
+  font-family: 'Inter', sans-serif; min-height: 100vh;
+  display: flex; flex-direction: column;
+}
+
+/* ── TOP NAV ── */
+nav {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 28px; border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; background: rgba(8,11,16,0.96);
+  backdrop-filter: blur(12px); z-index: 100;
+  flex-wrap: wrap; gap: 10px;
+}
+.nav-logo {
+  font-family: 'DM Serif Display', serif; font-size: 1.2rem;
+  color: var(--text); text-decoration: none;
+}
+.nav-logo span { color: var(--accent); }
+
+.tab-bar {
+  display: flex; gap: 4px; flex-wrap: wrap;
+}
+.tab-btn {
+  background: none; border: 1px solid transparent; color: var(--muted);
+  font-family: 'Inter', sans-serif; font-size: 0.78rem; font-weight: 500;
+  padding: 7px 14px; border-radius: 8px; cursor: pointer; transition: all 0.15s;
+  display: flex; align-items: center; gap: 6px;
+}
+.tab-btn:hover { background: var(--surface); color: var(--text); }
+.tab-btn.active { background: var(--tag-bg); border-color: var(--border); color: var(--text); }
+.tab-btn.active.t-home   { color: var(--accent); }
+.tab-btn.active.t-viva   { color: var(--accent); }
+.tab-btn.active.t-dose   { color: var(--accent2); }
+.tab-btn.active.t-crisis { color: var(--crisis); }
+.tab-btn.active.t-mcq    { color: var(--warn); }
+
+.api-pill {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 8px; padding: 5px 10px; cursor: pointer;
+  font-size: 0.72rem; color: var(--muted); transition: border-color 0.15s;
+}
+.api-pill:hover { border-color: var(--accent); }
+.api-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--crisis); flex-shrink: 0; }
+.api-dot.connected { background: var(--accent2); }
+
+/* ── PAGES ── */
+.page { display: none; flex: 1; }
+.page.active { display: flex; flex-direction: column; }
+
+/* ── API KEY MODAL ── */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.8);
+  backdrop-filter: blur(8px); z-index: 200;
+  display: none; align-items: center; justify-content: center; padding: 20px;
+}
+.modal-overlay.open { display: flex; }
+.modal-box {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 16px; padding: 32px; max-width: 440px; width: 100%;
+  display: flex; flex-direction: column; gap: 14px; position: relative;
+}
+.modal-close {
+  position: absolute; top: 14px; right: 14px; background: none; border: none;
+  color: var(--muted); font-size: 1.1rem; cursor: pointer;
+}
+.modal-title { font-family: 'DM Serif Display', serif; font-size: 1.3rem; }
+.modal-sub { font-size: 0.82rem; color: var(--muted); line-height: 1.6; }
+.modal-input {
+  background: var(--surface2); border: 1px solid var(--border); border-radius: 8px;
+  color: var(--text); font-family: 'JetBrains Mono', monospace; font-size: 0.8rem;
+  padding: 12px 14px; outline: none; width: 100%; transition: border-color 0.15s;
+}
+.modal-input:focus { border-color: var(--accent); }
+.modal-input::placeholder { color: var(--muted); }
+.modal-btn {
+  background: var(--accent2); color: #000; font-weight: 700; font-size: 0.88rem;
+  border: none; border-radius: 10px; padding: 12px; cursor: pointer;
+  font-family: 'Inter', sans-serif; transition: opacity 0.15s;
+}
+.modal-btn:hover { opacity: 0.88; }
+.modal-steps { display: flex; flex-direction: column; gap: 8px; }
+.modal-step {
+  display: flex; gap: 10px; align-items: flex-start; font-size: 0.8rem; color: var(--muted); line-height: 1.5;
+}
+.step-num {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; font-weight: 700;
+  color: var(--accent); background: rgba(0,194,255,0.1); border: 1px solid rgba(0,194,255,0.2);
+  border-radius: 4px; padding: 2px 6px; flex-shrink: 0; margin-top: 1px;
+}
+.modal-warn {
+  font-size: 0.72rem; color: var(--warn); background: rgba(255,184,0,0.06);
+  border: 1px solid rgba(255,184,0,0.2); border-radius: 8px; padding: 10px 12px; line-height: 1.5;
+}
+
+/* ══════════════════════════════════════════
+   HOME PAGE
+══════════════════════════════════════════ */
+.home-wrap {
+  max-width: 900px; margin: 0 auto; padding: 60px 24px 80px; width: 100%;
+}
+.home-eyebrow {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 0.65rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--accent); border: 1px solid rgba(0,194,255,0.25);
+  background: rgba(0,194,255,0.06); padding: 5px 14px; border-radius: 20px; margin-bottom: 24px;
+}
+.home-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: clamp(2rem, 5vw, 3.2rem); line-height: 1.15;
+  margin-bottom: 18px;
+}
+.home-title em { font-style: italic; color: var(--accent2); }
+.home-sub { font-size: 0.95rem; color: var(--muted); line-height: 1.7; max-width: 520px; margin-bottom: 40px; }
+
+.tool-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-bottom: 48px; }
+.tool-card {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+  padding: 22px; cursor: pointer; transition: all 0.2s; text-align: left;
+  display: flex; flex-direction: column; gap: 10px;
+}
+.tool-card:hover { transform: translateY(-3px); }
+.tool-card.tc-viva:hover   { border-color: rgba(0,194,255,0.4); }
+.tool-card.tc-dose:hover   { border-color: rgba(0,255,178,0.4); }
+.tool-card.tc-crisis:hover { border-color: rgba(255,68,68,0.4); }
+.tool-card.tc-mcq:hover    { border-color: rgba(255,184,0,0.4); }
+.tc-icon { font-size: 1.8rem; }
+.tc-label { font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; }
+.tool-card.tc-viva   .tc-label { color: var(--accent); }
+.tool-card.tc-dose   .tc-label { color: var(--accent2); }
+.tool-card.tc-crisis .tc-label { color: var(--crisis); }
+.tool-card.tc-mcq    .tc-label { color: var(--warn); }
+.tc-name { font-family: 'DM Serif Display', serif; font-size: 1.05rem; }
+.tc-desc { font-size: 0.76rem; color: var(--muted); line-height: 1.5; }
+
+.proof-row { display: flex; gap: 24px; flex-wrap: wrap; margin-bottom: 40px; }
+.proof-item { text-align: center; }
+.proof-val { font-family: 'JetBrains Mono', monospace; font-size: 1.6rem; font-weight: 700; color: var(--accent2); }
+.proof-lbl { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); }
+
+.api-notice {
+  background: rgba(0,194,255,0.05); border: 1px solid rgba(0,194,255,0.2);
+  border-radius: 12px; padding: 18px 20px; display: flex; gap: 14px; align-items: flex-start;
+}
+.api-notice-icon { font-size: 1.3rem; flex-shrink: 0; }
+.api-notice-text { font-size: 0.82rem; color: var(--muted); line-height: 1.6; }
+.api-notice-text strong { color: var(--text); }
+.api-notice-btn {
+  margin-top: 10px; background: var(--accent); color: #000; font-weight: 700;
+  font-size: 0.78rem; border: none; border-radius: 8px; padding: 8px 16px;
+  cursor: pointer; font-family: 'Inter', sans-serif;
+}
+
+/* ══════════════════════════════════════════
+   SHARED TOOL STYLES
+══════════════════════════════════════════ */
+.tool-layout {
+  display: grid; grid-template-columns: 250px 1fr;
+  flex: 1; max-width: 1080px; margin: 0 auto; width: 100%; padding: 0 16px;
+}
+.tool-sidebar {
+  padding: 24px 18px 24px 0; border-right: 1px solid var(--border);
+  display: flex; flex-direction: column; gap: 16px; overflow-y: auto;
+}
+.tool-main {
+  padding: 24px 0 24px 24px; display: flex; flex-direction: column;
+  height: calc(100vh - 57px); overflow: hidden;
+}
+.sidebar-label {
+  font-size: 0.62rem; font-weight: 700; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--muted); margin-bottom: 6px;
+}
+.s-list { list-style: none; display: flex; flex-direction: column; gap: 3px; }
+.s-list li button {
+  width: 100%; text-align: left; background: none; border: none; cursor: pointer;
+  padding: 8px 10px; border-radius: 7px; font-size: 0.82rem; color: var(--muted);
+  font-family: 'Inter', sans-serif; transition: all 0.15s;
+}
+.s-list li button:hover { background: var(--surface); color: var(--text); }
+.s-list li button.active { background: var(--tag-bg); color: var(--accent); }
+.diff-row { display: flex; gap: 5px; }
+.diff-btn {
+  flex: 1; border: 1px solid var(--border); background: none; color: var(--muted);
+  font-size: 0.7rem; font-family: 'Inter', sans-serif; font-weight: 500;
+  padding: 5px 3px; border-radius: 6px; cursor: pointer; transition: all 0.15s;
+}
+.diff-btn.ae { border-color: var(--accent2); color: var(--accent2); background: rgba(0,255,178,0.07); }
+.diff-btn.am { border-color: var(--warn);    color: var(--warn);    background: rgba(255,184,0,0.07); }
+.diff-btn.ah { border-color: var(--crisis);  color: var(--crisis);  background: rgba(255,68,68,0.07); }
+.action-btn {
+  width: 100%; padding: 11px; font-weight: 600; font-size: 0.85rem; border: none;
+  border-radius: 9px; cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.15s;
+}
+.action-btn:hover:not(:disabled) { opacity: 0.88; transform: translateY(-1px); }
+.action-btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
+.action-btn.blue   { background: var(--accent);  color: #000; }
+.action-btn.green  { background: var(--accent2); color: #000; }
+.action-btn.red    { background: var(--crisis);  color: #fff; }
+.action-btn.yellow { background: var(--warn);    color: #000; }
+
+.score-box {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 9px; padding: 14px;
+}
+.score-box .sv { font-size: 0.62rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; }
+.score-box .sn { font-size: 1.8rem; font-family: 'DM Serif Display', serif; color: var(--accent2); }
+.score-box .ss { font-size: 0.72rem; color: var(--muted); }
+
+/* Chat messages */
+.messages {
+  flex: 1; overflow-y: auto; display: flex; flex-direction: column;
+  gap: 14px; padding-right: 4px; scroll-behavior: smooth;
+}
+.messages::-webkit-scrollbar { width: 3px; }
+.messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+.welcome-state {
+  flex: 1; display: flex; flex-direction: column; align-items: center;
+  justify-content: center; gap: 10px; text-align: center; color: var(--muted); padding: 32px;
+}
+.welcome-state .wi { font-size: 2.8rem; margin-bottom: 6px; }
+.welcome-state h2 { font-family: 'DM Serif Display', serif; font-size: 1.4rem; color: var(--text); }
+.welcome-state p { font-size: 0.82rem; line-height: 1.6; max-width: 340px; }
+.w-chips { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-top: 6px; }
+.w-chip { font-size: 0.7rem; background: var(--tag-bg); color: var(--accent); border: 1px solid var(--border); padding: 3px 10px; border-radius: 16px; }
+
+.msg { display: flex; flex-direction: column; max-width: 88%; }
+.msg.examiner { align-self: flex-start; }
+.msg.user     { align-self: flex-end; }
+.msg-role { font-size: 0.62rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 4px; }
+.msg.examiner .msg-role { color: var(--accent); }
+.msg.user     .msg-role { color: var(--accent2); text-align: right; }
+.msg-bubble { padding: 12px 16px; border-radius: 10px; font-size: 0.85rem; line-height: 1.65; }
+.msg.examiner .msg-bubble { background: var(--surface); border: 1px solid var(--border); border-top-left-radius: 2px; }
+.msg.user     .msg-bubble { background: #0D2035; border: 1px solid #1A3A5C; border-top-right-radius: 2px; }
+
+.feedback-bubble {
+  background: #0A1F12; border: 1px solid #1A4A2E; border-radius: 10px;
+  padding: 12px 16px; font-size: 0.83rem; line-height: 1.65; max-width: 92%; align-self: flex-start;
+}
+.fb-head { font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent2); margin-bottom: 6px; }
+
+.typing {
+  align-self: flex-start; background: var(--surface); border: 1px solid var(--border);
+  border-radius: 10px; padding: 10px 14px; display: flex; gap: 5px; align-items: center;
+}
+.typing span { width: 6px; height: 6px; border-radius: 50%; background: var(--muted); animation: blink 1.2s infinite; }
+.typing span:nth-child(2) { animation-delay: 0.2s; }
+.typing span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes blink { 0%,80%,100%{opacity:0.2;transform:scale(0.8)} 40%{opacity:1;transform:scale(1)} }
+
+.input-row { display: flex; gap: 8px; margin-top: 12px; align-items: flex-end; }
+.input-wrap { flex: 1; }
+textarea {
+  width: 100%; background: var(--surface); border: 1px solid var(--border);
+  border-radius: 10px; color: var(--text); font-family: 'Inter', sans-serif;
+  font-size: 0.85rem; line-height: 1.5; padding: 11px 14px; resize: none; outline: none;
+  min-height: 48px; max-height: 130px; transition: border-color 0.15s;
+}
+textarea:focus { border-color: var(--accent); }
+textarea::placeholder { color: var(--muted); }
+textarea:disabled { opacity: 0.4; cursor: not-allowed; }
+.send-btn {
+  background: var(--accent); border: none; border-radius: 9px; width: 44px; height: 44px;
+  cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: opacity 0.15s;
+}
+.send-btn:hover { opacity: 0.85; }
+.send-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+.send-btn svg { width: 18px; height: 18px; fill: #000; }
+.mic-btn {
+  width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--border);
+  background: var(--surface); cursor: pointer; display: flex; align-items: center; justify-content: center;
+  font-size: 1.1rem; transition: all 0.2s; flex-shrink: 0;
+}
+.mic-btn.listening { background: rgba(255,79,79,0.15); border-color: var(--crisis); animation: mpulse 1.5s infinite; }
+@keyframes mpulse { 0%,100%{box-shadow:0 0 0 3px rgba(255,79,79,0.15)} 50%{box-shadow:0 0 0 8px rgba(255,79,79,0.05)} }
+.mic-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+.hint { font-size: 0.7rem; color: var(--muted); margin-top: 6px; text-align: center; }
+
+/* Voice status */
+.voice-bar {
+  display: none; align-items: center; gap: 10px; padding: 8px 14px; margin-bottom: 8px;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 8px; font-size: 0.78rem; color: var(--muted);
+}
+.voice-bar.vis { display: flex; }
+.vdot { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); flex-shrink: 0; }
+.vdot.vl { background: var(--crisis); animation: blink 1s infinite; }
+.vdot.vs { background: var(--accent); animation: blink 1s infinite; }
+.waveform { display: none; align-items: center; gap: 3px; height: 20px; }
+.waveform.on { display: flex; }
+.waveform span { display: block; width: 3px; border-radius: 3px; background: var(--accent); animation: wv 1s infinite ease-in-out; }
+.waveform span:nth-child(1){height:6px;animation-delay:0s}
+.waveform span:nth-child(2){height:14px;animation-delay:0.1s}
+.waveform span:nth-child(3){height:20px;animation-delay:0.2s}
+.waveform span:nth-child(4){height:12px;animation-delay:0.3s}
+.waveform span:nth-child(5){height:16px;animation-delay:0.15s}
+@keyframes wv { 0%,100%{transform:scaleY(0.4);opacity:0.5} 50%{transform:scaleY(1);opacity:1} }
+
+.voice-toggle-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 12px; background: var(--surface); border: 1px solid var(--border); border-radius: 9px;
+}
+.vtl { font-size: 0.78rem; color: var(--text); display: flex; align-items: center; gap: 7px; }
+.pill {
+  width: 36px; height: 20px; background: var(--border); border-radius: 10px; border: none;
+  position: relative; cursor: pointer; transition: background 0.2s;
+}
+.pill::after { content:''; position:absolute; width:14px;height:14px; background:var(--muted); border-radius:50%; top:3px;left:3px; transition:all 0.2s; }
+.pill.on { background: rgba(0,194,255,0.25); }
+.pill.on::after { left:19px; background:var(--accent); }
+
+/* ══════════════════════════════════════════
+   DOSE CALCULATOR
+══════════════════════════════════════════ */
+.dose-page { flex: 1; overflow-y: auto; padding: 24px; max-width: 1000px; margin: 0 auto; width: 100%; }
+.weight-bar {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+  padding: 18px 22px; display: flex; align-items: center; gap: 16px; margin-bottom: 22px; flex-wrap: wrap;
+}
+.weight-bar label { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); white-space: nowrap; }
+.weight-input-wrap { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 180px; }
+.weight-input-wrap input[type=range] { flex: 1; accent-color: var(--accent); height: 4px; cursor: pointer; }
+.weight-val { font-family: 'JetBrains Mono', monospace; font-size: 1.3rem; font-weight: 700; color: var(--accent); min-width: 65px; text-align: right; }
+.wnum { background: var(--tag-bg); border: 1px solid var(--border); border-radius: 7px; color: var(--text); font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; padding: 7px 10px; width: 80px; text-align: center; outline: none; }
+.wnum:focus { border-color: var(--accent); }
+.cat-tabs { display: flex; gap: 6px; margin-bottom: 18px; flex-wrap: wrap; }
+.cat-btn {
+  background: none; border: 1px solid var(--border); color: var(--muted);
+  font-family: 'Inter', sans-serif; font-size: 0.75rem; font-weight: 500;
+  padding: 6px 14px; border-radius: 7px; cursor: pointer; transition: all 0.15s;
+}
+.cat-btn:hover { border-color: var(--accent); color: var(--text); }
+.cat-btn.active { background: var(--tag-bg); border-color: var(--accent); color: var(--accent); }
+.drug-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 12px; }
+.drug-card { background: var(--surface); border: 1px solid var(--border); border-radius: 11px; padding: 16px 18px; }
+.drug-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 10px; }
+.drug-name { font-weight: 600; font-size: 0.9rem; }
+.drug-class { font-size: 0.6rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; padding: 3px 8px; border-radius: 5px; }
+.ci { background:rgba(0,194,255,0.1); color:var(--accent); }
+.co { background:rgba(255,184,0,0.1); color:var(--warn); }
+.cm { background:rgba(0,255,178,0.1); color:var(--accent2); }
+.cl { background:rgba(160,100,255,0.1); color:#A064FF; }
+.ce { background:rgba(255,79,79,0.1); color:var(--crisis); }
+.cs { background:rgba(100,180,255,0.1); color:#64B4FF; }
+.cr { background:rgba(255,255,255,0.08); color:#AAB8C8; }
+.dose-rows { display: flex; flex-direction: column; gap: 7px; }
+.dose-row { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.dose-label { font-size: 0.72rem; color: var(--muted); }
+.dose-result { font-family: 'JetBrains Mono', monospace; font-size: 1rem; font-weight: 600; color: var(--accent2); }
+.dose-range { font-size: 0.67rem; color: var(--muted); text-align: right; margin-top:-3px; }
+.drug-note { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); font-size: 0.7rem; color: var(--muted); line-height: 1.5; }
+.drug-note.wn { color: #D4931A; }
+.tiva-section { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px 22px; margin-top: 22px; }
+.tiva-title { font-family: 'DM Serif Display', serif; font-size: 1.05rem; color: var(--accent2); margin-bottom: 4px; }
+.tiva-sub { font-size: 0.75rem; color: var(--muted); margin-bottom: 14px; }
+.tiva-inputs { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }
+.tf { display: flex; flex-direction: column; gap: 5px; }
+.tf label { font-size: 0.68rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
+.tf select, .tf input[type=number] { background:var(--tag-bg); border:1px solid var(--border); border-radius:7px; color:var(--text); font-family:'Inter',sans-serif; font-size:0.82rem; padding:8px 10px; outline:none; min-width:130px; }
+.tiva-results { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; }
+.trb { background: var(--surface2); border: 1px solid var(--border); border-radius: 9px; padding: 12px 14px; }
+.trb .tl { font-size: 0.65rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 5px; }
+.trb .tv { font-family: 'JetBrains Mono', monospace; font-size: 1.1rem; font-weight: 700; color: var(--accent2); }
+.trb .tu { font-size: 0.68rem; color: var(--muted); margin-top: 2px; }
+.disclaimer { margin-top: 20px; padding: 12px 16px; background: rgba(255,79,79,0.05); border: 1px solid rgba(255,79,79,0.18); border-radius: 9px; font-size: 0.72rem; color: #906060; line-height: 1.6; }
+
+/* ══════════════════════════════════════════
+   CRISIS SIMULATOR
+══════════════════════════════════════════ */
+.crisis-bar-ui {
+  background: rgba(255,68,68,0.07); border: 1px solid rgba(255,68,68,0.22);
+  border-radius: 11px; padding: 14px 18px; display: flex; align-items: flex-start; gap: 12px;
+}
+.crisis-label-ui { font-size: 0.62rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--crisis); margin-bottom: 5px; }
+.crisis-text-ui { font-family: 'DM Serif Display', serif; font-size: 1.05rem; line-height: 1.5; color: var(--text); }
+.vitals-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.vital { background:var(--surface); border:1px solid var(--border); border-radius:7px; padding:7px 12px; display:flex; flex-direction:column; gap:2px; min-width:70px; }
+.vital.vd { border-color:rgba(255,68,68,0.4); background:rgba(255,68,68,0.04); }
+.vital.vw { border-color:rgba(255,184,0,0.4); background:rgba(255,184,0,0.04); }
+.vital.vo { border-color:rgba(0,255,178,0.3); background:rgba(0,255,178,0.03); }
+.vital .vl { font-size:0.58rem; text-transform:uppercase; letter-spacing:0.1em; color:var(--muted); }
+.vital .vv { font-family:'JetBrains Mono',monospace; font-size:0.95rem; font-weight:700; }
+.vital.vd .vv { color:var(--crisis); }
+.vital.vw .vv { color:var(--warn); }
+.vital.vo .vv { color:var(--accent2); }
+.eval-bubble { background:var(--surface); border:1px solid var(--border); border-radius:11px; padding:14px 18px; font-size:0.83rem; line-height:1.7; }
+.eval-label { font-size:0.62rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--accent); margin-bottom:8px; display:flex; align-items:center; gap:5px; }
+.eval-label::before { content:''; width:5px;height:5px; background:var(--accent); border-radius:50%; }
+.debrief-card { background:#0A1A0E; border:1px solid #1A3A22; border-radius:11px; padding:16px 18px; font-size:0.83rem; line-height:1.7; }
+.debrief-label { font-size:0.62rem; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; color:var(--accent2); margin-bottom:8px; }
+.user-bubble { background:#0A1828; border:1px solid #183050; border-radius:11px; padding:12px 16px; font-size:0.83rem; line-height:1.65; align-self:flex-end; max-width:88%; }
+.user-bubble-label { font-size:0.62rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--accent2); margin-bottom:6px; text-align:right; }
+.rl-badge { display:inline-flex; align-items:center; gap:5px; background:rgba(255,184,0,0.07); border:1px solid rgba(255,184,0,0.25); border-radius:7px; padding:5px 10px; font-size:0.72rem; color:var(--warn); }
+.resource-row { display:flex; align-items:center; justify-content:space-between; padding:10px 12px; background:var(--surface); border:1px solid var(--border); border-radius:9px; }
+
+/* ══════════════════════════════════════════
+   MCQ
+══════════════════════════════════════════ */
+.mcq-page { flex:1; overflow-y:auto; padding:24px; max-width:740px; margin:0 auto; width:100%; display:flex; flex-direction:column; gap:18px; }
+.streak-row { display:flex; gap:10px; }
+.streak-chip { background:var(--surface); border:1px solid var(--border); border-radius:9px; padding:9px 14px; flex:1; text-align:center; }
+.streak-chip .sv { font-family:'JetBrains Mono',monospace; font-size:1.3rem; font-weight:700; color:var(--accent2); }
+.streak-chip.fire .sv { color:var(--warn); }
+.streak-chip .sl { font-size:0.6rem; text-transform:uppercase; letter-spacing:0.1em; color:var(--muted); margin-top:2px; }
+.mcq-config { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:18px 20px; display:flex; gap:14px; flex-wrap:wrap; align-items:flex-end; }
+.mcq-field { display:flex; flex-direction:column; gap:5px; flex:1; min-width:130px; }
+.mcq-field label { font-size:0.65rem; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; color:var(--muted); }
+.mcq-field select { background:var(--tag-bg); border:1px solid var(--border); border-radius:7px; color:var(--text); font-family:'Inter',sans-serif; font-size:0.82rem; padding:8px 10px; outline:none; }
+.mcq-field select:focus { border-color:var(--accent); }
+.q-card { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:24px; display:flex; flex-direction:column; gap:16px; transition:border-color 0.2s; }
+.q-card.qc  { border-color:rgba(0,255,178,0.35); }
+.q-card.qw  { border-color:rgba(255,79,79,0.35); }
+.q-meta { display:flex; gap:8px; flex-wrap:wrap; }
+.q-topic { font-size:0.6rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; background:var(--tag-bg); color:var(--accent); border:1px solid var(--border); padding:3px 9px; border-radius:5px; }
+.q-diff { font-size:0.6rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; padding:3px 9px; border-radius:5px; }
+.qde { background:rgba(0,255,178,0.08); color:var(--accent2); }
+.qdm { background:rgba(255,184,0,0.08); color:var(--warn); }
+.qdh { background:rgba(255,79,79,0.08); color:var(--crisis); }
+.q-text { font-size:0.95rem; line-height:1.7; }
+.options { display:flex; flex-direction:column; gap:8px; }
+.opt-btn {
+  width:100%; text-align:left; background:var(--surface2); border:1px solid var(--border);
+  border-radius:9px; color:var(--text); font-family:'Inter',sans-serif; font-size:0.85rem;
+  line-height:1.5; padding:12px 16px; cursor:pointer; display:flex; align-items:flex-start;
+  gap:10px; transition:all 0.15s;
+}
+.opt-btn:hover:not(:disabled) { border-color:var(--accent); background:rgba(0,194,255,0.04); }
+.opt-btn:disabled { cursor:default; }
+.opt-btn.oc  { background:rgba(0,255,178,0.07); border-color:rgba(0,255,178,0.4); }
+.opt-btn.ow  { background:rgba(255,79,79,0.07);  border-color:rgba(255,79,79,0.4); }
+.opt-btn.orc { background:rgba(0,255,178,0.04); border-color:rgba(0,255,178,0.25); }
+.opt-letter { font-family:'JetBrains Mono',monospace; font-size:0.75rem; font-weight:700; color:var(--muted); flex-shrink:0; margin-top:1px; }
+.opt-btn.oc .opt-letter  { color:var(--accent2); }
+.opt-btn.ow .opt-letter  { color:var(--crisis); }
+.opt-btn.orc .opt-letter { color:var(--accent2); }
+.flash { display:none; align-items:center; gap:8px; padding:10px 14px; border-radius:9px; font-weight:600; font-size:0.85rem; }
+.flash.show { display:flex; }
+.flash.fc { background:rgba(0,255,178,0.08); color:var(--accent2); border:1px solid rgba(0,255,178,0.25); }
+.flash.fw { background:rgba(255,79,79,0.08);  color:var(--crisis);  border:1px solid rgba(255,79,79,0.25); }
+.expl { background:#0A1A0E; border:1px solid #1A3A22; border-radius:9px; padding:14px 16px; font-size:0.82rem; line-height:1.7; display:none; }
+.expl.show { display:block; }
+.expl-head { font-size:0.62rem; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; color:var(--accent2); margin-bottom:7px; }
+.expl-ref { margin-top:8px; padding-top:8px; border-top:1px solid #1A3A22; font-size:0.72rem; color:var(--muted); }
+.next-btn { align-self:flex-end; background:var(--accent); color:#000; font-weight:700; font-size:0.85rem; border:none; border-radius:9px; padding:10px 24px; cursor:pointer; font-family:'Inter',sans-serif; display:none; transition:opacity 0.15s; }
+.next-btn.show { display:block; }
+.next-btn:hover { opacity:0.88; }
+.results-card { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:32px; display:flex; flex-direction:column; align-items:center; gap:16px; text-align:center; }
+.res-emoji { font-size:3rem; }
+.res-score { font-family:'DM Serif Display',serif; font-size:2.8rem; }
+.res-sub { font-size:0.82rem; color:var(--muted); }
+.res-row { display:flex; gap:12px; flex-wrap:wrap; justify-content:center; }
+.res-chip { background:var(--surface2); border:1px solid var(--border); border-radius:9px; padding:10px 18px; text-align:center; }
+.res-chip .rv { font-family:'JetBrains Mono',monospace; font-size:1.3rem; font-weight:700; }
+.res-chip .rl { font-size:0.62rem; text-transform:uppercase; letter-spacing:0.1em; color:var(--muted); margin-top:3px; }
+.res-chip.rc .rv { color:var(--accent2); }
+.res-chip.rw .rv { color:var(--crisis); }
+.res-chip.rt .rv { color:var(--accent); }
+.weak-box { background:rgba(255,184,0,0.05); border:1px solid rgba(255,184,0,0.2); border-radius:9px; padding:12px 16px; width:100%; text-align:left; font-size:0.8rem; line-height:1.7; }
+.weak-title { font-size:0.65rem; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; color:var(--warn); margin-bottom:5px; }
+.loading-card { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:36px; display:flex; flex-direction:column; align-items:center; gap:12px; color:var(--muted); font-size:0.82rem; }
+.ldots { display:flex; gap:5px; }
+.ldots span { width:8px;height:8px; border-radius:50%; background:var(--accent2); animation:blink 1.2s infinite; }
+.ldots span:nth-child(2){animation-delay:0.2s}
+.ldots span:nth-child(3){animation-delay:0.4s}
+.prog-wrap { display:flex; flex-direction:column; gap:6px; }
+.prog-row { display:flex; justify-content:space-between; align-items:center; font-size:0.75rem; color:var(--muted); }
+.prog-row .qc-num { font-family:'JetBrains Mono',monospace; color:var(--text); font-weight:600; }
+.prog-track { height:3px; background:var(--border); border-radius:3px; overflow:hidden; }
+.prog-fill { height:100%; background:var(--accent2); border-radius:3px; transition:width 0.4s ease; }
+
+/* Responsive */
+@media(max-width:680px){
+  .tool-layout{grid-template-columns:1fr}
+  .tool-sidebar{border-right:none;border-bottom:1px solid var(--border);padding:16px 0}
+  .tool-main{padding:16px 0;height:auto;min-height:70vh}
+  nav{padding:12px 16px}
+  .tab-btn{font-size:0.72rem;padding:6px 10px}
+}
+</style>
+<!-- Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-R7T7D55ML6"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-R7T7D55ML6');
+</script>
+</head>
+<body>
+
+<!-- TOP NAV -->
+<nav>
+  <a class="nav-logo" href="#">Anaesthesia<span>Insider</span></a>
+  <div class="tab-bar">
+    <button class="tab-btn t-home active" onclick="switchTab('home')">🏠 Home</button>
+    <button class="tab-btn t-viva"         onclick="switchTab('viva')">🎤 Viva</button>
+    <button class="tab-btn t-dose"         onclick="switchTab('dose')">💊 Doses</button>
+    <button class="tab-btn t-crisis"       onclick="switchTab('crisis')">🚨 Crisis</button>
+    <button class="tab-btn t-mcq"          onclick="switchTab('mcq')">📝 MCQ</button>
+  </div>
+  <div class="api-pill" onclick="openApiModal()">
+    <div class="api-dot" id="apiDot"></div>
+    <span id="apiPillText">Add API Key</span>
+  </div>
+</nav>
+
+<!-- ══ HOME PAGE ══ -->
+<div class="page active" id="page-home">
+  <div class="home-wrap">
+    <div class="home-eyebrow">🩺 Built for Indian Anaesthesiologists</div>
+    <h1 class="home-title">The platform that treats you<br>like the <em>specialist</em> you are</h1>
+    <p class="home-sub">AI-powered tools for DNB/MD exam prep, daily clinical reference, and crisis management — built specifically for anaesthesiologists in India.</p>
+
+    <div class="tool-cards">
+      <div class="tool-card tc-viva" onclick="switchTab('viva')">
+        <div class="tc-icon">🎤</div>
+        <div class="tc-label">AI Viva Examiner</div>
+        <div class="tc-name">Practice oral exams</div>
+        <div class="tc-desc">Real DNB/MD viva questions with two-way voice mode and instant scoring.</div>
+      </div>
+      <div class="tool-card tc-dose" onclick="switchTab('dose')">
+        <div class="tc-icon">💊</div>
+        <div class="tc-label">Dose Calculator</div>
+        <div class="tc-name">Every drug, instantly</div>
+        <div class="tc-desc">30+ drugs with live weight-based calculations and TIVA infusion rates.</div>
+      </div>
+      <div class="tool-card tc-crisis" onclick="switchTab('crisis')">
+        <div class="tc-icon">🚨</div>
+        <div class="tc-label">Crisis Simulator</div>
+        <div class="tc-name">Manage worst cases</div>
+        <div class="tc-desc">12 real OT emergencies with India's only Resource-Limited Mode.</div>
+      </div>
+      <div class="tool-card tc-mcq" onclick="switchTab('mcq')">
+        <div class="tc-icon">📝</div>
+        <div class="tc-label">Daily MCQ</div>
+        <div class="tc-name">Ten questions a day</div>
+        <div class="tc-desc">AI-generated DNB pattern MCQs with explanations and weak topic tracking.</div>
+      </div>
+    </div>
+
+    <div class="proof-row">
+      <div class="proof-item"><div class="proof-val">4</div><div class="proof-lbl">AI Tools</div></div>
+      <div class="proof-item"><div class="proof-val">30+</div><div class="proof-lbl">Crisis Scenarios</div></div>
+      <div class="proof-item"><div class="proof-val">30+</div><div class="proof-lbl">Drugs Covered</div></div>
+      <div class="proof-item"><div class="proof-val">🎤</div><div class="proof-lbl">Voice Viva</div></div>
+    </div>
+
+    <div class="api-notice" id="apiNotice">
+      <div class="api-notice-icon">🔑</div>
+      <div class="api-notice-text">
+        <strong>Add your Gemini API key to activate AI features.</strong><br>
+        Get a free key at <strong>aistudio.google.com</strong> — comes with $5 free credit. Your key stays in your browser only.
+        <br><button class="api-notice-btn" onclick="openApiModal()">Add API Key →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ VIVA PAGE ══ -->
+<div class="page" id="page-viva">
+  <div class="tool-layout">
+    <aside class="tool-sidebar">
+      <div>
+        <div class="sidebar-label">Topic</div>
+        <ul class="s-list" id="vivaTopicList">
+          <li><button class="active" data-topic="Critical Care">Critical Care</button></li>
+          <li><button data-topic="Airway Management">Airway Management</button></li>
+          <li><button data-topic="Pharmacology">Pharmacology</button></li>
+          <li><button data-topic="Regional Anaesthesia">Regional Anaesthesia</button></li>
+          <li><button data-topic="Cardiac Anaesthesia">Cardiac Anaesthesia</button></li>
+          <li><button data-topic="Paediatric Anaesthesia">Paediatric Anaesthesia</button></li>
+          <li><button data-topic="Neuro Anaesthesia">Neuro Anaesthesia</button></li>
+          <li><button data-topic="Crisis Management">Crisis Management</button></li>
+          <li><button data-topic="Equipment & Monitoring">Equipment & Monitoring</button></li>
+          <li><button data-topic="Obstetric Anaesthesia">Obstetric Anaesthesia</button></li>
+        </ul>
+      </div>
+      <div>
+        <div class="sidebar-label">Difficulty</div>
+        <div class="diff-row">
+          <button class="diff-btn ae" data-diff="Easy">Easy</button>
+          <button class="diff-btn"    data-diff="Medium">Med</button>
+          <button class="diff-btn"    data-diff="Hard">Hard</button>
+        </div>
+      </div>
+      <div class="voice-toggle-row">
+        <div class="vtl"><span>🎤</span> Voice Mode</div>
+        <button class="pill" id="vivaPill" onclick="toggleVivaVoice()"></button>
+      </div>
+      <div id="voiceNote" style="display:none;font-size:0.7rem;color:var(--accent2);padding:6px 10px;background:rgba(0,255,178,0.05);border:1px solid rgba(0,255,178,0.15);border-radius:7px;line-height:1.5">
+        🎤 Voice ON — Start session, then tap mic to speak your answer
+      </div>
+      <button class="action-btn blue" id="vivaStartBtn" onclick="vivaStart()">Start Viva Session</button>
+      <div class="score-box">
+        <div class="sv">Session Score</div>
+        <div class="sn" id="vivaScore">—</div>
+        <div class="ss" id="vivaSub">Start a session</div>
+      </div>
+    </aside>
+    <div class="tool-main">
+      <div class="voice-bar" id="vivaVoiceBar">
+        <div class="vdot" id="vivaVDot"></div>
+        <div class="waveform" id="vivaWave"><span></span><span></span><span></span><span></span><span></span></div>
+        <span id="vivaVText">Voice mode active</span>
+      </div>
+      <div class="messages" id="vivaMessages">
+        <div class="welcome-state" id="vivaWelcome">
+          <div class="wi">🩺</div>
+          <h2>Ready when you are</h2>
+          <p>Select topic, difficulty, enable voice mode if you want a real spoken viva, then start.</p>
+          <div class="w-chips">
+            <span class="w-chip">Two-Way Voice</span>
+            <span class="w-chip">Live Scoring</span>
+            <span class="w-chip">DNB · MD · NEET PG</span>
+          </div>
+        </div>
+      </div>
+      <div class="input-row">
+        <div class="input-wrap">
+          <textarea id="vivaInput" placeholder="Type your answer… or enable Voice Mode" rows="1" disabled></textarea>
+        </div>
+        <button class="mic-btn" id="vivaMic" style="display:none" disabled onclick="vivaMicClick()">🎤</button>
+        <button class="send-btn" id="vivaSend" disabled onclick="vivaSend()">
+          <svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>
+        </button>
+      </div>
+      <p class="hint" id="vivaHint">Select a topic and click Start to begin</p>
+    </div>
+  </div>
+</div>
+
+<!-- ══ DOSE PAGE ══ -->
+<div class="page" id="page-dose">
+  <div class="dose-page">
+    <div class="weight-bar">
+      <label>Patient Weight</label>
+      <div class="weight-input-wrap">
+        <input type="range" id="wSlider" min="2" max="150" value="70" step="0.5" oninput="setW(this.value)">
+        <div class="weight-val" id="wDisplay">70 kg</div>
+      </div>
+      <input type="number" class="wnum" id="wNum" value="70" min="2" max="150" step="0.5" oninput="setW(this.value)">
+    </div>
+    <div class="cat-tabs" id="catTabs">
+      <button class="cat-btn active" data-cat="all" onclick="setDoseCat(this,'all')">All</button>
+      <button class="cat-btn" data-cat="induction" onclick="setDoseCat(this,'induction')">Induction</button>
+      <button class="cat-btn" data-cat="opioid"    onclick="setDoseCat(this,'opioid')">Opioids</button>
+      <button class="cat-btn" data-cat="muscle"    onclick="setDoseCat(this,'muscle')">Muscle Relaxants</button>
+      <button class="cat-btn" data-cat="local"     onclick="setDoseCat(this,'local')">Local Anaesthetics</button>
+      <button class="cat-btn" data-cat="emergency" onclick="setDoseCat(this,'emergency')">Emergency</button>
+      <button class="cat-btn" data-cat="sedation"  onclick="setDoseCat(this,'sedation')">Sedation</button>
+      <button class="cat-btn" data-cat="reversal"  onclick="setDoseCat(this,'reversal')">Reversal</button>
+    </div>
+    <div class="drug-grid" id="drugGrid"></div>
+    <div class="tiva-section">
+      <div class="tiva-title">TIVA Calculator</div>
+      <div class="tiva-sub">Propofol, Remifentanil, Dexmedetomidine infusion rates</div>
+      <div class="tiva-inputs">
+        <div class="tf"><label>Drug</label>
+          <select id="tivaDrug" onchange="calcTIVA()">
+            <option value="pi">Propofol — Induction</option>
+            <option value="pm">Propofol — Maintenance</option>
+            <option value="ps">Propofol — Sedation</option>
+            <option value="rm">Remifentanil</option>
+            <option value="dx">Dexmedetomidine</option>
+          </select>
+        </div>
+        <div class="tf"><label>Conc (mg/ml)</label><input type="number" id="tivaConc" value="10" min="1" max="20" step="0.5" oninput="calcTIVA()"></div>
+        <div class="tf"><label>Volume (ml)</label><input type="number" id="tivaVol" value="50" min="10" max="100" step="5" oninput="calcTIVA()"></div>
+      </div>
+      <div class="tiva-results" id="tivaRes"></div>
+    </div>
+    <div class="disclaimer">⚠️ <strong>Clinical Disclaimer:</strong> For educational and reference purposes only. Always verify doses against current formularies, institutional protocols, and individual patient factors. Not a substitute for clinical judgement.</div>
+  </div>
+</div>
+
+<!-- ══ CRISIS PAGE ══ -->
+<div class="page" id="page-crisis">
+  <div class="tool-layout">
+    <aside class="tool-sidebar">
+      <div>
+        <div class="sidebar-label">Crisis Category</div>
+        <ul class="s-list" id="crisisScenarioList">
+          <li><button class="active" data-s="Difficult Airway / CICO">Difficult Airway / CICO</button></li>
+          <li><button data-s="Anaphylaxis">Anaphylaxis</button></li>
+          <li><button data-s="Malignant Hyperthermia">Malignant Hyperthermia</button></li>
+          <li><button data-s="Cardiac Arrest on Table">Cardiac Arrest on Table</button></li>
+          <li><button data-s="Massive Haemorrhage / MTP">Massive Haemorrhage / MTP</button></li>
+          <li><button data-s="High Spinal Block">High Spinal Block</button></li>
+          <li><button data-s="LA Systemic Toxicity (LAST)">LA Systemic Toxicity (LAST)</button></li>
+          <li><button data-s="Bronchospasm">Bronchospasm</button></li>
+          <li><button data-s="Paediatric Emergency">Paediatric Emergency</button></li>
+          <li><button data-s="Intraoperative PE">Intraoperative PE</button></li>
+          <li><button data-s="Surprise — Random Crisis">⚡ Surprise Me</button></li>
+        </ul>
+      </div>
+      <div class="resource-row">
+        <div class="vtl" style="font-size:0.78rem;color:var(--text);">🇮🇳 Resource-Limited</div>
+        <button class="pill" id="crisisPill" onclick="toggleCrisisRL()"></button>
+      </div>
+      <button class="action-btn red" id="crisisBtn" onclick="crisisActivate()">🚨 Activate Crisis</button>
+      <div class="score-box">
+        <div class="sv">Scenarios Run</div>
+        <div class="sn" id="crisisScore">0</div>
+        <div class="ss" id="crisisSub">Avg: —</div>
+      </div>
+    </aside>
+    <div class="tool-main">
+      <div class="messages" id="crisisMessages">
+        <div class="welcome-state" id="crisisWelcome">
+          <div class="wi">🚨</div>
+          <h2>Ready for the worst case</h2>
+          <p>Select a crisis, toggle Resource-Limited mode for Indian OT conditions, then activate.</p>
+          <div class="w-chips">
+            <span class="w-chip">CICO</span><span class="w-chip">Anaphylaxis</span>
+            <span class="w-chip">MH Crisis</span><span class="w-chip">🇮🇳 Resource-Limited</span>
+          </div>
+        </div>
+      </div>
+      <div class="input-row">
+        <div class="input-wrap">
+          <textarea id="crisisInput" placeholder="What do you do next? Type your management steps…" rows="1" disabled></textarea>
+        </div>
+        <button class="send-btn" id="crisisSend" disabled onclick="crisisSendReply()" style="background:var(--crisis)">
+          <svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>
+        </button>
+      </div>
+      <p class="hint" id="crisisHint">Select a category and click Activate Crisis</p>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MCQ PAGE ══ -->
+<div class="page" id="page-mcq">
+  <div class="mcq-page" id="mcqPage">
+    <div class="streak-row">
+      <div class="streak-chip fire"><div class="sv" id="mcqStreak">0</div><div class="sl">🔥 Streak</div></div>
+      <div class="streak-chip"><div class="sv" id="mcqTotal">0</div><div class="sl">Total Done</div></div>
+      <div class="streak-chip"><div class="sv" id="mcqAcc">—</div><div class="sl">Accuracy</div></div>
+    </div>
+    <div class="mcq-config">
+      <div class="mcq-field"><label>Topic</label>
+        <select id="mcqTopic">
+          <option>Mixed — All Topics</option><option>Pharmacology</option>
+          <option>Airway Management</option><option>Critical Care</option>
+          <option>Regional Anaesthesia</option><option>Cardiac Anaesthesia</option>
+          <option>Paediatric Anaesthesia</option><option>Neuro Anaesthesia</option>
+          <option>Equipment & Monitoring</option><option>Pain Management</option>
+        </select>
+      </div>
+      <div class="mcq-field"><label>Difficulty</label>
+        <select id="mcqDiff"><option>Mixed</option><option>Easy</option><option>Medium</option><option>Hard</option></select>
+      </div>
+      <div class="mcq-field"><label>Questions</label>
+        <select id="mcqCount"><option value="5">5 — Quick</option><option value="10" selected>10 — Standard</option><option value="20">20 — Deep Dive</option></select>
+      </div>
+      <button class="action-btn yellow" id="mcqStartBtn" style="align-self:flex-end;min-width:100px" onclick="mcqStart()">Start Quiz</button>
+    </div>
+    <div id="mcqContent">
+      <div class="loading-card" style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:36px;display:flex;flex-direction:column;align-items:center;gap:10px;color:var(--muted);font-size:0.82rem;">
+        <div style="font-size:2.5rem">📝</div>
+        <div style="font-family:'DM Serif Display',serif;font-size:1.3rem;color:var(--text)">Your daily MCQ practice</div>
+        <div style="font-size:0.82rem;text-align:center;max-width:360px">AI-generated DNB/MD pattern questions. Select your topic and start.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- API KEY MODAL -->
+<div class="modal-overlay" id="apiModal" onclick="handleModalClick(event)">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeApiModal()">✕</button>
+    <div class="modal-title">Add Anthropic API Key</div>
+    <div class="modal-sub">Your key is stored only in your browser — never sent anywhere else.</div>
+    <div class="modal-steps">
+      <div class="modal-step"><div class="step-num">1</div>Go to <strong>console.anthropic.com</strong> and sign up free</div>
+      <div class="modal-step"><div class="step-num">2</div>Click <strong>API Keys</strong> → Create Key → name it "AnaesthesiaInsider"</div>
+      <div class="modal-step"><div class="step-num">3</div>Copy the key (starts with sk-ant-...) and paste below</div>
+    </div>
+    <input class="modal-input" type="password" id="apiKeyInput" placeholder="AIzaSy...">
+    <div class="modal-warn">⚠️ Never share your API key. It is like a password. This platform stores it only in your browser's local memory.</div>
+    <button class="modal-btn" onclick="saveApiKey()">Save & Activate →</button>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════
+// GLOBAL STATE
+// ══════════════════════════════════════════
+let API_KEY = sessionStorage.getItem('gemini_key') || 'AQ.Ab8RN6IorSHDCVqXaEQg79uVsPO0PoBCUA8KNBUK0wyqnLjjiQ';
+let currentTab = 'home';
+
+function getKey() { return API_KEY; }
+
+// ── Tab switching ──────────────────────────
+function switchTab(tab) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + tab).classList.add('active');
+  document.querySelector('.t-' + tab).classList.add('active');
+  currentTab = tab;
+}
+
+// ── API Key modal ──────────────────────────
+function openApiModal() { document.getElementById('apiModal').classList.add('open'); }
+function closeApiModal() { document.getElementById('apiModal').classList.remove('open'); }
+function handleModalClick(e) { if (e.target === document.getElementById('apiModal')) closeApiModal(); }
+function saveApiKey() {
+  const key = document.getElementById('apiKeyInput').value.trim();
+  if (key.length < 20) { alert('Please enter a valid Anthropic API key starting with sk-ant-...'); return; }
+  API_KEY = key;
+  sessionStorage.setItem('gemini_key', key);
+  document.getElementById('apiDot').classList.add('connected');
+  document.getElementById('apiPillText').textContent = 'API Connected';
+  document.getElementById('apiNotice').style.display = 'none';
+  closeApiModal();
+}
+function checkApiKey() {
+  if (API_KEY) {
+    document.getElementById('apiDot').classList.add('connected');
+    document.getElementById('apiPillText').textContent = 'API Connected';
+    document.getElementById('apiNotice').style.display = 'none';
+  }
+}
+
+// ── Claude API call ────────────────────────
+async function callClaude(system, messages) {
+  if (!API_KEY) { openApiModal(); throw new Error('No API key — click Add API Key to add your free Gemini key'); }
+  var contents = [];
+  if (system) {
+    contents.push({role:'user', parts:[{text:'Instructions: ' + system}]});
+    contents.push({role:'model', parts:[{text:'Understood. I will follow these instructions carefully.'}]});
+  }
+  for (var i = 0; i < messages.length; i++) {
+    contents.push({
+      role: messages[i].role === 'assistant' ? 'model' : 'user',
+      parts: [{text: messages[i].content}]
+    });
+  }
+  var MAX = 3, DELAYS = [2000, 4000, 8000];
+  for (var attempt = 0; attempt <= MAX; attempt++) {
+    try {
+      var res = await fetch(
+        'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=' + API_KEY,
+        {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({contents: contents, generationConfig: {maxOutputTokens: 1500, temperature: 0.7}})
+        }
+      );
+      var data = await res.json();
+      if (data.error) {
+        var code = data.error.code || 0;
+        var msg = data.error.message || 'API error';
+        var retry = code === 429 || code === 503 || msg.indexOf('quota') > -1 || msg.indexOf('demand') > -1;
+        if (retry && attempt < MAX) { await new Promise(function(r){setTimeout(r, DELAYS[attempt]);}); continue; }
+        throw new Error(msg);
+      }
+      return (data.candidates && data.candidates[0] && data.candidates[0].content &&
+              data.candidates[0].content.parts && data.candidates[0].content.parts[0] &&
+              data.candidates[0].content.parts[0].text) || 'AQ.Ab8RN6IorSHDCVqXaEQg79uVsPO0PoBCUA8KNBUK0wyqnLjjiQ';
+    } catch(err) {
+      if (attempt < MAX && err.message.indexOf('API') === -1) {
+        await new Promise(function(r){setTimeout(r, DELAYS[attempt]);});
+        continue;
+      }
+      throw err;
+    }
+  }
+  throw new Error('Server busy. Please try again in a moment.');
+}
+
+// ── Helpers ────────────────────────────────
+function ft(t) { return (t||'').replace(/\n/g,'<br>'); }
+function scrollB(id) { const el = document.getElementById(id); el.scrollTop = el.scrollHeight; }
+function showTypingIn(messagesId) {
+  const el = document.createElement('div');
+  el.className = 'typing'; el.innerHTML = '<span></span><span></span><span></span>';
+  document.getElementById(messagesId).appendChild(el);
+  scrollB(messagesId); return el;
+}
+
+// ══════════════════════════════════════════
+// VIVA EXAMINER
+// ══════════════════════════════════════════
+let vivaTopic = 'Critical Care', vivaDiff = 'Easy', vivaVoice = false, sessionActive = false;
+let vivaLoading = false, vivaHistory = [], vivaTotalScore = 0, vivaQCount = 0;
+let vivaRec = null, vivaListening = false, vivaSpeaking = false;
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+const synth = window.speechSynthesis;
+if (synth) { synth.getVoices(); setTimeout(()=>synth.getVoices(),500); }
+
+document.getElementById('vivaTopicList').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  document.querySelectorAll('#vivaTopicList button').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active'); vivaTopic = b.dataset.topic;
+});
+document.querySelectorAll('.diff-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const par = btn.closest('.diff-row');
+    par.querySelectorAll('.diff-btn').forEach(b=>b.classList.remove('ae','am','ah'));
+    vivaDiff = btn.dataset.diff;
+    if(vivaDiff==='Easy') btn.classList.add('ae');
+    else if(vivaDiff==='Medium') btn.classList.add('am');
+    else btn.classList.add('ah');
+  });
+});
+
+function toggleVivaVoice() {
+  if (!SR || !synth) {
+    alert('Voice mode requires Chrome or Edge browser. Please open this page in Chrome.');
+    return;
+  }
+  vivaVoice = !vivaVoice;
+  document.getElementById('vivaPill').classList.toggle('on', vivaVoice);
+  updateVivaInput(); // Always update regardless of session state
+  var note = document.getElementById('voiceNote');
+  if (note) note.style.display = vivaVoice ? 'block' : 'none';
+}
+function updateVivaInput() {
+  const mic=document.getElementById('vivaMic'), snd=document.getElementById('vivaSend'), inp=document.getElementById('vivaInput');
+  if (vivaVoice) {
+    // Show mic, hide text input
+    mic.style.display='flex';
+    snd.style.display='none';
+    inp.style.display='none';
+    // Enable mic only when session active and not loading/speaking
+    mic.disabled = !sessionActive || vivaLoading || vivaSpeaking;
+    document.getElementById('vivaVoiceBar').classList.add('vis');
+    if (sessionActive) {
+      setVivaVStatus('ready', 'Tap mic to answer');
+    } else {
+      setVivaVStatus('ready', 'Voice mode ON — Start session then tap mic');
+    }
+    document.getElementById('vivaHint').textContent = sessionActive
+      ? 'Tap the 🎤 mic button and speak your answer'
+      : 'Voice mode ON — click Start Viva Session';
+    var mh = document.getElementById('voiceMicHint');
+    if (mh) mh.style.display = sessionActive ? 'block' : 'none';
+  } else {
+    mic.style.display='none'; snd.style.display='flex'; inp.style.display='block';
+    snd.disabled=vivaLoading; inp.disabled=vivaLoading;
+    document.getElementById('vivaVoiceBar').classList.remove('vis');
+  }
+}
+function setVivaVStatus(state,text) {
+  const dot=document.getElementById('vivaVDot'), wave=document.getElementById('vivaWave'), txt=document.getElementById('vivaVText');
+  dot.className='vdot'+(state==='listening'?' vl':state==='speaking'?' vs':'');
+  wave.className='waveform'+(state==='speaking'?' on':'');
+  txt.textContent=text;
+}
+async function vivaSpeakText(text) {
+  if (!vivaVoice||!synth) return;
+  const clean=text.replace(/SCORE:\s*\d+\/10/gi,'').replace(/FEEDBACK:/gi,'').replace(/FOLLOW-UP:/gi,'Follow up.').replace(/\*\*/g,'').replace(/<br>/g,' ').trim();
+  return new Promise(res=>{
+    synth.cancel(); vivaSpeaking=true;
+    setVivaVStatus('speaking','Examiner speaking…');
+    const u=new SpeechSynthesisUtterance(clean); u.rate=0.92; u.pitch=0.95;
+    const voices=synth.getVoices();
+    const v=voices.find(v=>v.lang.startsWith('en')&&(v.name.includes('Male')||v.name.includes('Daniel')))||voices.find(v=>v.lang.startsWith('en'));
+    if(v) u.voice=v;
+    u.onend=()=>{vivaSpeaking=false;if(vivaVoice){setVivaVStatus('ready','Tap mic to answer');document.getElementById('vivaMic').disabled=false;}res();};
+    u.onerror=()=>{vivaSpeaking=false;res();};
+    synth.speak(u);
+  });
+}
+function setupVivaRec() {
+  if (!SR) return;
+  vivaRec=new SR(); vivaRec.continuous=false; vivaRec.interimResults=true; vivaRec.lang='en-IN';
+  vivaRec.onstart=()=>{vivaListening=true;document.getElementById('vivaMic').classList.add('listening');setVivaVStatus('listening','Listening…');};
+  vivaRec.onresult=e=>{
+    let f='',i='';
+    for(let x=e.resultIndex;x<e.results.length;x++){if(e.results[x].isFinal)f+=e.results[x][0].transcript;else i+=e.results[x][0].transcript;}
+    document.getElementById('vivaInput').style.display='block';
+    document.getElementById('vivaInput').value=f||i;
+  };
+  vivaRec.onend=()=>{
+    vivaListening=false;document.getElementById('vivaMic').classList.remove('listening');
+    const t=document.getElementById('vivaInput').value.trim();
+    if(t){document.getElementById('vivaInput').style.display=vivaVoice?'none':'block';vivaSubmitVoice(t);}
+    else setVivaVStatus('ready','Nothing heard — try again');
+  };
+  vivaRec.onerror=e=>{vivaListening=false;document.getElementById('vivaMic').classList.remove('listening');setVivaVStatus('ready','Error — try again');};
+}
+function vivaMicClick() {
+  if (!SR) {
+    alert('Speech recognition not supported. Please use Chrome browser on Android.');
+    return;
+  }
+  if (vivaListening) {
+    try { vivaRec.stop(); } catch(e) { vivaListening = false; }
+  } else {
+    if (!vivaRec) setupVivaRec();
+    synth.cancel();
+    document.getElementById('vivaInput').value = '';
+    document.getElementById('vivaInput').style.display = 'block';
+    try {
+      vivaRec.start();
+    } catch(e) {
+      console.log('Mic start error:', e.message);
+      // If already started, stop and restart
+      try { vivaRec.stop(); } catch(e2) {}
+      setTimeout(function() {
+        setupVivaRec();
+        try { vivaRec.start(); } catch(e3) {
+          setVivaVStatus('ready', 'Mic error — check browser permissions');
+          alert('Microphone access needed. Please allow mic access in browser settings.');
+        }
+      }, 500);
+    }
+  }
+}
+async function vivaSubmitVoice(text) {
+  document.getElementById('vivaMic').disabled=true;
+  setVivaVStatus('ready','Processing…');
+  vivaAppendMsg('user',text);
+  document.getElementById('vivaInput').value='';
+  vivaHistory.push({role:'user',content:text});
+  await vivaCall();
+}
+
+document.getElementById('vivaInput').addEventListener('input',function(){this.style.height='auto';this.style.height=Math.min(this.scrollHeight,130)+'px';});
+document.getElementById('vivaInput').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();if(!document.getElementById('vivaSend').disabled)vivaSend();}});
+function vivaSend() {
+  const t=document.getElementById('vivaInput').value.trim(); if(!t||vivaLoading)return;
+  vivaAppendMsg('user',t); document.getElementById('vivaInput').value=''; document.getElementById('vivaInput').style.height='auto';
+  document.getElementById('vivaInput').disabled=true; document.getElementById('vivaSend').disabled=true;
+  vivaHistory.push({role:'user',content:t}); vivaCall();
+}
+async function vivaStart() {
+  sessionActive = true;
+  vivaHistory=[]; vivaTotalScore=0; vivaQCount=0;
+  document.getElementById('vivaWelcome')?.remove();
+  document.getElementById('vivaMessages').innerHTML='';
+  document.getElementById('vivaScore').textContent='—'; document.getElementById('vivaSub').textContent='In progress';
+  document.getElementById('vivaStartBtn').textContent='↺ New Session';
+  document.getElementById('vivaInput').disabled=true; document.getElementById('vivaSend').disabled=true; document.getElementById('vivaMic').disabled=true;
+  if (vivaVoice) updateVivaInput(); // Refresh mic state for voice mode
+  document.getElementById('vivaHint').textContent='Examiner preparing…';
+  if(vivaVoice) updateVivaInput();
+  vivaHistory.push({role:'user',content:'Start the viva examination.'});
+  await vivaCall();
+}
+async function vivaCall() {
+  vivaLoading=true; const typing=showTypingIn('vivaMessages');
+  const sys = 'You are a strict but fair senior anaesthesiology examiner conducting a DNB/MD viva in India.' +
+    '\nTOPIC: ' + vivaTopic +
+    '\nDIFFICULTY: ' + vivaDiff +
+    (vivaVoice ? '\nVOICE MODE: Keep questions short and clear for spoken answers.' : '') +
+    '\n\nRULES:' +
+    '\n- Start with ONE clean question only — no labels, no preamble, no score' +
+    '\n- After candidate answers, respond in this format:' +
+    '\nSCORE: [X/10]' +
+    '\nFEEDBACK: [2-3 sentences on what was good and what was missing]' +
+    '\nFOLLOW-UP: [One follow-up question — plain text only, no label needed after this]' +
+    '\n\nIMPORTANT: Your FIRST message must be ONLY the question. Nothing else. No score. No feedback. Just the question.';
+  try {
+    const reply=await callClaude(sys,vivaHistory);
+    typing.remove(); vivaHistory.push({role:'assistant',content:reply});
+    const sm=reply.match(/SCORE:\s*(\d+)\/10/i);
+    if(sm){vivaQCount++;vivaTotalScore+=parseInt(sm[1]);document.getElementById('vivaScore').textContent=(vivaTotalScore/vivaQCount).toFixed(1)+'/10';document.getElementById('vivaSub').textContent=vivaQCount+' answered';vivaAppendFeedback(reply);if(vivaVoice){const fm=reply.match(/FOLLOW-UP:\s*(.+)/is);if(fm)await vivaSpeakText(fm[1].trim());}}
+    else{vivaAppendMsg('examiner',reply);if(vivaVoice)await vivaSpeakText(reply);}
+    if(vivaVoice){document.getElementById('vivaMic').disabled=false;if(!vivaSpeaking)setVivaVStatus('ready','Tap mic to answer');document.getElementById('vivaHint').textContent='Tap mic to answer';}
+    else{document.getElementById('vivaInput').disabled=false;document.getElementById('vivaSend').disabled=false;document.getElementById('vivaInput').focus();document.getElementById('vivaHint').textContent='Type answer and press Enter';}
+  } catch(err){typing.remove();vivaAppendMsg('examiner','⚠️ '+err.message);document.getElementById('vivaHint').textContent='Error — check API key';}
+  vivaLoading=false;
+}
+function vivaAppendMsg(role,text) {
+  const d=document.createElement('div');d.className='msg '+role;
+  d.innerHTML=`<div class="msg-role">${role==='examiner'?'🩺 Examiner':'👨‍⚕️ You'}</div><div class="msg-bubble">${ft(text)}</div>`;
+  document.getElementById('vivaMessages').appendChild(d);scrollB('vivaMessages');
+}
+function vivaAppendFeedback(text) {
+  const sm=text.match(/SCORE:\s*(\d+)\/10/i),fm=text.match(/FEEDBACK:\s*(.+?)(?=FOLLOW-UP:|$)/is),flm=text.match(/FOLLOW-UP:\s*(.+)/is);
+  const score=sm?sm[1]:'?',fb=fm?fm[1].trim():'',fu=flm?flm[1].trim():'';
+  const c=parseInt(score)>=8?'var(--accent2)':parseInt(score)>=5?'var(--warn)':'var(--crisis)';
+  const d=document.createElement('div');d.className='feedback-bubble';
+  d.innerHTML=`<div class="fb-head">Feedback</div><div><span style="font-family:'JetBrains Mono',monospace;font-size:1rem;font-weight:700;color:${c};margin-right:6px">${score}/10</span>${ft(fb)}</div>${fu?`<div style="margin-top:10px;padding-top:10px;border-top:1px solid #1A4A2E"><span style="font-size:0.62rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--accent);display:block;margin-bottom:5px">Next</span>${ft(fu)}</div>`:''}`;
+  document.getElementById('vivaMessages').appendChild(d);scrollB('vivaMessages');
+}
+
+// ══════════════════════════════════════════
+// DOSE CALCULATOR
+// ══════════════════════════════════════════
+let doseWeight=70, doseCat='all';
+const DRUGS=[
+  {n:'Propofol',cat:'induction',cls:'ci',clsL:'Induction',doses:[{l:'Induction (healthy)',pk:[1.5,2.5],u:'mg'},{l:'Induction (elderly)',pk:[1.0,1.5],u:'mg'},{l:'Sedation infusion',pk:[0.3,4.0],u:'mg',sf:'/hr'}],note:'Reduce in elderly, hypovolaemia, ASA III–IV.'},
+  {n:'Ketamine',cat:'induction',cls:'ci',clsL:'Induction',doses:[{l:'IV Induction',pk:[1,2],u:'mg'},{l:'IM Induction',pk:[4,10],u:'mg'},{l:'Analgesia IV',pk:[0.1,0.5],u:'mg'}],note:'Ideal for asthma, haemodynamic instability.'},
+  {n:'Thiopentone',cat:'induction',cls:'ci',clsL:'Induction',doses:[{l:'Induction',pk:[3,5],u:'mg'},{l:'Elderly',pk:[1,3],u:'mg'}],note:'Contraindicated in porphyria.'},
+  {n:'Etomidate',cat:'induction',cls:'ci',clsL:'Induction',doses:[{l:'Induction',pk:[0.2,0.4],u:'mg'}],note:'Single dose only — inhibits cortisol synthesis.'},
+  {n:'Fentanyl',cat:'opioid',cls:'co',clsL:'Opioid',doses:[{l:'Intraoperative bolus',pk:[1,3],u:'mcg'},{l:'Induction adjunct',pk:[2,5],u:'mcg'},{l:'Infusion',pk:[1,3],u:'mcg',sf:'/hr'}],note:'Chest wall rigidity with rapid large doses.'},
+  {n:'Morphine',cat:'opioid',cls:'co',clsL:'Opioid',doses:[{l:'IV analgesia',pk:[0.05,0.1],u:'mg'},{l:'IM/SC',pk:[0.1,0.2],u:'mg'}],note:'Active metabolite accumulates in renal failure.'},
+  {n:'Tramadol',cat:'opioid',cls:'co',clsL:'Opioid',doses:[{l:'IV infusion',fx:[50,100],u:'mg'}],note:'Fixed dose — not weight-based. Infuse slowly.'},
+  {n:'Pethidine',cat:'opioid',cls:'co',clsL:'Opioid',doses:[{l:'IV bolus',pk:[0.5,1.0],u:'mg'},{l:'IM',pk:[1.0,1.5],u:'mg'}],note:'Avoid in renal failure and with MAOIs.'},
+  {n:'Succinylcholine',cat:'muscle',cls:'cm',clsL:'Muscle Relaxant',doses:[{l:'RSI adult',pk:[1.0,1.5],u:'mg'},{l:'RSI paediatric',pk:[2.0,2.0],u:'mg'}],note:'⚠️ Contraindicated in burns >24hr, crush injury, hyperkalaemia.'},
+  {n:'Rocuronium',cat:'muscle',cls:'cm',clsL:'Muscle Relaxant',doses:[{l:'Intubation',pk:[0.6,1.2],u:'mg'},{l:'RSI dose',pk:[1.2,1.2],u:'mg'},{l:'Maintenance',pk:[0.15,0.3],u:'mg'}],note:'High dose reversal requires Sugammadex 16 mg/kg.'},
+  {n:'Atracurium',cat:'muscle',cls:'cm',clsL:'Muscle Relaxant',doses:[{l:'Intubation',pk:[0.4,0.6],u:'mg'},{l:'Maintenance',pk:[0.1,0.2],u:'mg'}],note:'Hoffman elimination — safe in renal/hepatic failure.'},
+  {n:'Vecuronium',cat:'muscle',cls:'cm',clsL:'Muscle Relaxant',doses:[{l:'Intubation',pk:[0.08,0.1],u:'mg'},{l:'Maintenance',pk:[0.02,0.05],u:'mg'}],note:'Prolonged action in hepatic failure.'},
+  {n:'Cisatracurium',cat:'muscle',cls:'cm',clsL:'Muscle Relaxant',doses:[{l:'Intubation',pk:[0.15,0.2],u:'mg'},{l:'Maintenance',pk:[0.03,0.06],u:'mg'}],note:'Preferred in ICU — minimal histamine release.'},
+  {n:'Lignocaine',cat:'local',cls:'cl',clsL:'Local Anaesthetic',doses:[{l:'Max dose plain',pk:[3,5],u:'mg'},{l:'Max with adrenaline',pk:[5,7],u:'mg'}],note:'⚠️ Have Intralipid ready. NEVER exceed max doses.'},
+  {n:'Bupivacaine',cat:'local',cls:'cl',clsL:'Local Anaesthetic',doses:[{l:'Max dose',pk:[2,2],u:'mg'}],note:'⚠️ Most cardiotoxic LA — never give IV. Max ≤150 mg.'},
+  {n:'Ropivacaine',cat:'local',cls:'cl',clsL:'Local Anaesthetic',doses:[{l:'Max dose',pk:[3,4],u:'mg'}],note:'Less cardiotoxic than bupivacaine. Preferred for epidurals.'},
+  {n:'Adrenaline',cat:'emergency',cls:'ce',clsL:'Emergency',doses:[{l:'Cardiac arrest IV',pk:[0.01,0.01],u:'mg'},{l:'Anaphylaxis IM',pk:[0.01,0.01],u:'mg'},{l:'Infusion',pk:[0.05,0.5],u:'mcg',sf:'/min'}],note:'⚠️ ARREST: 1mg every 3–5 min. ANAPHYLAXIS: 0.5mg IM thigh.'},
+  {n:'Atropine',cat:'emergency',cls:'ce',clsL:'Emergency',doses:[{l:'Bradycardia',pk:[0.01,0.02],u:'mg'},{l:'Max single dose',fx:[3,3],u:'mg'}],note:'Min dose 0.5 mg to avoid paradoxical bradycardia.'},
+  {n:'Ephedrine',cat:'emergency',cls:'ce',clsL:'Vasopressor',doses:[{l:'IV bolus',fx:[6,12],u:'mg'}],note:'Fixed dose. First-line for spinal-induced hypotension.'},
+  {n:'Phenylephrine',cat:'emergency',cls:'ce',clsL:'Vasopressor',doses:[{l:'IV bolus',pk:[1,2],u:'mcg'},{l:'Infusion',pk:[0.5,1.5],u:'mcg',sf:'/min'}],note:'Pure alpha — preferred in obstetrics.'},
+  {n:'Midazolam',cat:'sedation',cls:'cs',clsL:'Sedation',doses:[{l:'Premedication IV',pk:[0.02,0.05],u:'mg'},{l:'Procedural sedation',pk:[0.03,0.1],u:'mg'}],note:'Reduce 30–50% in elderly. Reversible with flumazenil.'},
+  {n:'Dexmedetomidine',cat:'sedation',cls:'cs',clsL:'Sedation',doses:[{l:'Loading (over 10 min)',pk:[0.5,1.0],u:'mcg'},{l:'Maintenance infusion',pk:[0.2,0.7],u:'mcg',sf:'/hr'}],note:'Cooperative sedation. Excellent for awake intubation.'},
+  {n:'Neostigmine',cat:'reversal',cls:'cr',clsL:'Reversal',doses:[{l:'NMB Reversal',pk:[0.04,0.08],u:'mg'}],note:'Always give with Glycopyrrolate. Only reverse at TOF >0.4.'},
+  {n:'Sugammadex',cat:'reversal',cls:'cr',clsL:'Reversal',doses:[{l:'Moderate block',pk:[2,2],u:'mg'},{l:'Deep block',pk:[4,4],u:'mg'},{l:'Immediate RSI reversal',pk:[16,16],u:'mg'}],note:'Reverses Rocuronium/Vecuronium only. ⚠️ Expensive.'},
+  {n:'Flumazenil',cat:'reversal',cls:'cr',clsL:'Reversal',doses:[{l:'Benzo reversal',fx:[0.2,0.2],u:'mg'},{l:'Repeat max',fx:[1,1],u:'mg'}],note:'Short half-life — resedation possible. Monitor 2 hours.'},
+  {n:'Naloxone',cat:'reversal',cls:'cr',clsL:'Reversal',doses:[{l:'Titrated reversal',pk:[0.001,0.004],u:'mg'},{l:'Full reversal',pk:[0.01,0.015],u:'mg'}],note:'⚠️ Precipitates acute withdrawal. Titrate carefully.'},
+];
+function setW(v){doseWeight=Math.min(150,Math.max(2,parseFloat(v)||70));document.getElementById('wSlider').value=doseWeight;document.getElementById('wNum').value=doseWeight;document.getElementById('wDisplay').textContent=doseWeight%1===0?doseWeight+' kg':doseWeight.toFixed(1)+' kg';renderDrugs();calcTIVA();}
+function setDoseCat(btn,cat){document.querySelectorAll('.cat-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');doseCat=cat;renderDrugs();}
+function calcD(d,w){if(d.fx){if(d.fx[0]===d.fx[1])return d.fx[0]+' '+d.u+(d.sf||'');return d.fx[0]+'–'+d.fx[1]+' '+d.u+(d.sf||'') +' (fixed)';}const lo=(d.pk[0]*w).toFixed(1),hi=(d.pk[1]*w).toFixed(1);return (lo===hi?lo:lo+'–'+hi)+' '+d.u+(d.sf||'');}
+function calcR(d,w){if(d.fx)return '';const lo=d.pk[0],hi=d.pk[1];return lo===hi?`(${lo} ${d.u}/kg)`:`(${lo}–${hi} ${d.u}/kg)`;}
+function renderDrugs(){const g=document.getElementById('drugGrid');const f=doseCat==='all'?DRUGS:DRUGS.filter(d=>d.cat===doseCat);g.innerHTML=f.map(drug=>`<div class="drug-card"><div class="drug-header"><div class="drug-name">${drug.n}</div><div class="drug-class ${drug.cls}">${drug.clsL}</div></div><div class="dose-rows">${drug.doses.map(d=>`<div><div class="dose-row"><span class="dose-label">${d.l}</span><span class="dose-result">${calcD(d,doseWeight)}</span></div>${calcR(d,doseWeight)?`<div class="dose-range">${calcR(d,doseWeight)}</div>`:''}</div>`).join('')}</div>${drug.note?`<div class="drug-note ${drug.note.startsWith('⚠️')?'wn':''}">${drug.note}</div>`:''}</div>`).join('');}
+const TIVA_D={pi:{mcgKgMin:[100,200]},pm:{mcgKgMin:[50,150]},ps:{mcgKgMin:[5,50]},rm:{mcgKgMin:[0.05,0.5]},dx:{mcgKgHr:[0.2,0.7]}};
+function calcTIVA(){const k=document.getElementById('tivaDrug').value,conc=parseFloat(document.getElementById('tivaConc').value)||10,vol=parseFloat(document.getElementById('tivaVol').value)||50,d=TIVA_D[k],w=doseWeight,totalMg=conc*vol,cMcg=conc*1000;let lo,hi;if(d.mcgKgMin){lo=(d.mcgKgMin[0]*w*60)/cMcg;hi=(d.mcgKgMin[1]*w*60)/cMcg;}else{lo=(d.mcgKgHr[0]*w)/(cMcg/60);hi=(d.mcgKgHr[1]*w)/(cMcg/60);}const dur=(totalMg*60)/(d.mcgKgMin?d.mcgKgMin[0]*w/1000:d.mcgKgHr[0]*w/1000/60);document.getElementById('tivaRes').innerHTML=`<div class="trb"><div class="tl">Syringe</div><div class="tv">${totalMg.toFixed(0)} mg</div><div class="tu">${conc} mg/ml × ${vol} ml</div></div><div class="trb"><div class="tl">Rate Range</div><div class="tv">${lo.toFixed(1)}–${hi.toFixed(1)}</div><div class="tu">ml/hr for this patient</div></div><div class="trb"><div class="tl">Syringe Duration</div><div class="tv">${Math.floor(dur/60)}h ${Math.round(dur%60)}m</div><div class="tu">at minimum rate</div></div>`;}
+
+// ══════════════════════════════════════════
+// CRISIS SIMULATOR
+// ══════════════════════════════════════════
+let crisisScenario='Difficult Airway / CICO',crisisRL=false,crisisLoading=false,crisisHistory=[],crisisRun=0,crisisScoreTotal=0;
+document.getElementById('crisisScenarioList').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;document.querySelectorAll('#crisisScenarioList button').forEach(x=>x.classList.remove('active'));b.classList.add('active');crisisScenario=b.dataset.s;});
+function toggleCrisisRL(){crisisRL=!crisisRL;document.getElementById('crisisPill').classList.toggle('on',crisisRL);}
+async function crisisActivate(){
+  crisisHistory=[]; document.getElementById('crisisWelcome')?.remove(); document.getElementById('crisisMessages').innerHTML='';
+  document.getElementById('crisisInput').disabled=true;document.getElementById('crisisSend').disabled=true;document.getElementById('crisisBtn').disabled=true;
+  document.getElementById('crisisHint').textContent='Generating crisis scenario…';
+  _crisisExchangeCount = 0;
+  const sys=`You are a consultant anaesthesiologist starting a REAL-TIME step-by-step crisis simulation for a DNB/MD trainee in India.
+
+CRISIS: ${crisisScenario}
+${crisisRL?'RESOURCE-LIMITED: No video laryngoscope, no sugammadex, no intralipid available.':'Full tertiary OT resources available.'}
+
+Set up the scene: brief patient introduction, surgery type, and the FIRST sign of crisis (2-3 sentences only).
+Include current vitals: VITALS: HR:110 BP:85/50 SpO2:91% EtCO2:28 RR:8
+End with exactly ONE urgent question: "What is your FIRST action RIGHT NOW?"
+
+Do NOT evaluate anything yet. Do NOT use SCORE or FINAL_DEBRIEF in this first message. Just set the scene.`;
+  crisisHistory.push({role:'user',content:'Begin the crisis scenario.'});
+  const typing=showTypingIn('crisisMessages');
+  try{const reply=await callClaude(sys,crisisHistory);typing.remove();crisisHistory.push({role:'assistant',content:reply});renderCrisisScenario(reply);document.getElementById('crisisInput').disabled=false;document.getElementById('crisisSend').disabled=false;document.getElementById('crisisBtn').disabled=false;document.getElementById('crisisHint').textContent='Type your immediate management steps';}
+  catch(err){typing.remove();crisisAppend('⚠️ '+err.message,'eval');document.getElementById('crisisBtn').disabled=false;}
+}
+function crisisAppend(html,type){const p=document.getElementById('crisisMessages');const d=document.createElement('div');if(type==='user'){d.className='user-bubble';d.innerHTML=`<div class="user-bubble-label">👨‍⚕️ Your Management</div>${html}`;}else{d.className='eval-bubble';d.innerHTML=`<div class="eval-label">Response</div>${html}`;}p.appendChild(d);scrollB('crisisMessages');}
+function renderCrisisScenario(text){const p=document.getElementById('crisisMessages');const vm=text.match(/VITALS:\s*HR:(\S+)\s+BP:(\S+)\s+SpO2:(\S+)\s+EtCO2:(\S+)\s+RR:(\S+)/i);const clean=text.replace(/VITALS:.*$/m,'').trim();const cb=document.createElement('div');cb.className='crisis-bar-ui';cb.innerHTML=`<div style="font-size:1.3rem;flex-shrink:0">🚨</div><div><div class="crisis-label-ui">Active Crisis — ${crisisScenario}</div><div class="crisis-text-ui">${ft(clean)}</div></div>`;p.appendChild(cb);if(vm){const vr=document.createElement('div');vr.className='vitals-row';const spo2=parseInt(vm[3]),hr=parseInt(vm[1]);const sc=spo2<90?'vd':spo2<95?'vw':'vo',hc=hr>120||hr<50?'vd':hr>100?'vw':'vo';vr.innerHTML=`<div class="vital ${hc}"><div class="vl">HR</div><div class="vv">${vm[1]}</div></div><div class="vital vw"><div class="vl">BP</div><div class="vv">${vm[2]}</div></div><div class="vital ${sc}"><div class="vl">SpO₂</div><div class="vv">${vm[3]}%</div></div><div class="vital vo"><div class="vl">EtCO₂</div><div class="vv">${vm[4]}</div></div>`;p.appendChild(vr);}if(crisisRL){const b=document.createElement('div');b.innerHTML=`<div class="rl-badge">⚠️ Resource-Limited Mode</div>`;p.appendChild(b);}scrollB('crisisMessages');}
+var _crisisExchangeCount = 0;
+
+async function crisisSendReply(){
+  var t = document.getElementById('crisisInput').value.trim();
+  if (!t || crisisLoading) return;
+  document.getElementById('crisisInput').value = '';
+  document.getElementById('crisisInput').disabled = true;
+  document.getElementById('crisisSend').disabled = true;
+
+  var ud = document.createElement('div');
+  ud.className = 'user-bubble';
+  ud.innerHTML = '<div class="user-bubble-label">\uD83D\uDC68\u200D\u2695\uFE0F Your Management</div>' + ft(t);
+  document.getElementById('crisisMessages').appendChild(ud);
+  scrollB('crisisMessages');
+  crisisHistory.push({role:'user', content:t});
+  crisisLoading = true;
+  _crisisExchangeCount++;
+
+  var typing = showTypingIn('crisisMessages');
+  var forceDebrief = _crisisExchangeCount >= 9;
+
+  var sys = 'You are a consultant anaesthesiologist running a REAL-TIME step-by-step crisis simulation for a DNB/MD trainee in India. You are the OT environment.\n\n' +
+    'CRISIS: ' + crisisScenario + '\n' +
+    (crisisRL ? 'RESOURCE-LIMITED: No video laryngoscope, no sugammadex, no intralipid available.' : 'Full tertiary OT resources available.') + '\n\n' +
+    'This is exchange number ' + _crisisExchangeCount + '.\n\n' +
+    (forceDebrief
+      ? 'This simulation has run long enough. Give the FINAL_DEBRIEF now:\nFINAL_DEBRIEF\nOVERALL: X/10\nSUMMARY: [2-3 sentences]\nKEY_LEARNING: [most important point]\nGUIDELINE: [relevant guideline]'
+      : 'The candidate just gave their management step. Respond in EXACTLY this format:\n\n' +
+        'STEP_SCORE: X/10\n' +
+        'STEP_FEEDBACK: [one short sentence on what was right or missed]\n\n' +
+        '[2-3 sentences: describe what happens NEXT in the OT as a direct result of their action. Be vivid, realistic, show consequence.]\n\n' +
+        'VITALS: HR:[updated] BP:[updated] SpO2:[updated]% EtCO2:[updated] RR:[updated]\n\n' +
+        '[ONE specific next question based on the new situation]\n\n' +
+        'RULES: Do NOT use FINAL_DEBRIEF yet. Do NOT resolve the crisis in one step. If correct, escalate with a new complication. If wrong, show realistic consequence then ask what next. One question at a time. This is exchange ' + _crisisExchangeCount + ' - keep building.'
+    );
+
+  try {
+    var reply = await callClaude(sys, crisisHistory);
+    typing.remove();
+    crisisHistory.push({role:'assistant', content:reply});
+
+    if (reply.indexOf('FINAL_DEBRIEF') !== -1) {
+      renderCrisisDebriefFixed(reply);
+      document.getElementById('crisisInput').disabled = true;
+      document.getElementById('crisisSend').disabled = true;
+      document.getElementById('crisisBtn').disabled = false;
+      crisisRun++;
+      var om = reply.match(/OVERALL:\s*(\d+)/i);
+      if (om) crisisScoreTotal += parseInt(om[1]);
+      document.getElementById('crisisScore').textContent = crisisRun;
+      document.getElementById('crisisSub').textContent = 'Avg: ' + (crisisScoreTotal/crisisRun).toFixed(1);
+      _crisisExchangeCount = 0;
+    } else {
+      renderCrisisEvalFixed(reply);
+      document.getElementById('crisisInput').disabled = false;
+      document.getElementById('crisisSend').disabled = false;
+      document.getElementById('crisisInput').focus();
+    }
+  } catch(err) {
+    typing.remove();
+    crisisAppend('\u26A0\uFE0F ' + err.message, 'eval');
+    document.getElementById('crisisInput').disabled = false;
+    document.getElementById('crisisSend').disabled = false;
+    document.getElementById('crisisBtn').disabled = false;
+  }
+  crisisLoading = false;
+}
+
+function renderCrisisEvalFixed(text) {
+  var p = document.getElementById('crisisMessages');
+  var ssm = text.match(/STEP_SCORE:\s*(\d+)/i);
+  var sfm = text.match(/STEP_FEEDBACK:\s*([\s\S]+?)(?=\n\nVITALS|\nVITALS:|VITALS:)/i);
+  var vm  = text.match(/VITALS:\s*HR:(\S+)\s+BP:(\S+)\s+SpO2:(\S+)%?\s+EtCO2:(\S+)\s+RR:(\S+)/i);
+
+  var clean = text
+    .replace(/STEP_SCORE:.*?\n/i, '')
+    .replace(/STEP_FEEDBACK:[\s\S]*?(?=\n\nVITALS|\nVITALS:|VITALS:)/i, '')
+    .replace(/VITALS:.*$/m, '')
+    .trim();
+
+  var score = ssm ? ssm[1] : '?';
+  var feedback = sfm ? sfm[1].trim() : '';
+  var sNum = parseInt(score);
+  var col = sNum >= 8 ? 'var(--accent2)' : sNum >= 5 ? 'var(--warn)' : 'var(--crisis)';
+
+  var fb = document.createElement('div');
+  fb.className = 'eval-bubble';
+  fb.innerHTML =
+    '<div class="eval-label">Step ' + _crisisExchangeCount + ' Feedback</div>' +
+    '<div style="display:flex;align-items:flex-start;gap:14px">' +
+      '<span style="font-family:JetBrains Mono,monospace;font-size:1.5rem;font-weight:700;color:' + col + ';flex-shrink:0">' + score + '/10</span>' +
+      '<span style="font-size:0.85rem;color:var(--text);line-height:1.6;margin-top:3px">' + ft(feedback) + '</span>' +
+    '</div>';
+  p.appendChild(fb);
+
+  if (vm) {
+    var spo2n = parseInt(vm[3]), hrn = parseInt(vm[1]);
+    var sc = spo2n < 90 ? 'vd' : spo2n < 95 ? 'vw' : 'vo';
+    var hc = (hrn > 120 || hrn < 50) ? 'vd' : hrn > 100 ? 'vw' : 'vo';
+    var vr = document.createElement('div');
+    vr.className = 'vitals-row';
+    vr.innerHTML =
+      '<div class="vital ' + hc + '"><div class="vl">HR</div><div class="vv">' + vm[1] + '</div></div>' +
+      '<div class="vital vw"><div class="vl">BP</div><div class="vv">' + vm[2] + '</div></div>' +
+      '<div class="vital ' + sc + '"><div class="vl">SpO\u2082</div><div class="vv">' + vm[3] + '%</div></div>' +
+      '<div class="vital vo"><div class="vl">EtCO\u2082</div><div class="vv">' + vm[4] + '</div></div>' +
+      '<div class="vital vo"><div class="vl">RR</div><div class="vv">' + vm[5] + '</div></div>';
+    p.appendChild(vr);
+  }
+
+  if (clean.length > 10) {
+    var su = document.createElement('div');
+    su.className = 'crisis-bar-ui';
+    su.style.background = 'rgba(255,184,0,0.05)';
+    su.style.borderColor = 'rgba(255,184,0,0.25)';
+    su.innerHTML =
+      '<div style="font-size:1.2rem;flex-shrink:0">\u26A1</div>' +
+      '<div><div style="font-size:0.6rem;font-weight:700;text-transform:uppercase;letter-spacing:0.14em;color:var(--warn);margin-bottom:5px">What Happens Next</div>' +
+      '<div style="font-size:0.9rem;line-height:1.65;color:var(--text)">' + ft(clean) + '</div></div>';
+    p.appendChild(su);
+
+    if (typeof _crisisAnsBtnCount === 'undefined') { window._crisisAnsBtnCount = 0; }
+    _crisisAnsBtnCount++;
+    var sbid = 'csb' + _crisisAnsBtnCount;
+    var sb = document.createElement('button');
+    sb.className = 'show-ans-btn';
+    sb.id = sbid;
+    sb.textContent = '\uD83D\uDCA1 What should I do here?';
+    sb.setAttribute('data-ctx', 'Crisis: ' + crisisScenario + (crisisRL ? ' Resource-Limited OT.' : '') + ' Situation: ' + clean.substring(0,300));
+    sb.addEventListener('click', function() {
+      showModelAnswer(this.getAttribute('data-ctx'), 'crisisMessages', this.id);
+    });
+    p.appendChild(sb);
+  }
+
+  scrollB('crisisMessages');
+}
+
+function renderCrisisDebriefFixed(text) {
+  var p = document.getElementById('crisisMessages');
+  var om = text.match(/OVERALL:\s*(\d+)/i);
+  var sm = text.match(/SUMMARY:\s*([\s\S]+?)(?=KEY_LEARNING:|$)/i);
+  var lm = text.match(/KEY_LEARNING:\s*([\s\S]+?)(?=GUIDELINE:|$)/i);
+  var gm = text.match(/GUIDELINE:\s*([\s\S]+)/i);
+
+  var score = om ? om[1] : '7';
+  var summary = sm ? sm[1].trim() : 'Crisis simulation completed.';
+  var learning = lm ? lm[1].trim() : '';
+  var guideline = gm ? gm[1].trim() : '';
+
+  var sNum = parseInt(score);
+  var col = sNum >= 8 ? 'var(--accent2)' : sNum >= 5 ? 'var(--warn)' : 'var(--crisis)';
+
+  var d = document.createElement('div');
+  d.className = 'debrief-card';
+  d.innerHTML =
+    '<div class="debrief-label">\uD83D\uDCCB Final Debrief</div>' +
+    '<div style="font-family:DM Serif Display,serif;font-size:2rem;color:' + col + ';margin-bottom:10px">' + score + '/10</div>' +
+    '<div style="margin-bottom:12px">' + ft(summary) + '</div>' +
+    (learning ? '<div style="padding:12px;background:rgba(0,194,255,0.05);border:1px solid rgba(0,194,255,0.15);border-radius:8px;margin-bottom:10px"><span style="font-size:0.6rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--accent);display:block;margin-bottom:5px">Key Learning</span>' + ft(learning) + '</div>' : '') +
+    (guideline ? '<div style="font-size:0.78rem;color:var(--muted)">\uD83D\uDCD6 ' + ft(guideline) + '</div>' : '');
+  p.appendChild(d);
+  scrollB('crisisMessages');
+}
+function renderCrisisEval(text){const p=document.getElementById('crisisMessages');const sm=text.match(/SCORE:\s*(\d+)\/10/i),cm=text.match(/CORRECT:\s*(.+?)(?=MISSED:|NEXT:|$)/is),mm=text.match(/MISSED:\s*(.+?)(?=NEXT:|$)/is),nm=text.match(/NEXT:\s*(.+)/is);const score=sm?sm[1]:'?',cor=cm?cm[1].trim():'',mis=mm?mm[1].trim():'',nxt=nm?nm[1].trim():'';const c=parseInt(score)>=8?'var(--accent2)':parseInt(score)>=5?'var(--warn)':'var(--crisis)';const d=document.createElement('div');d.className='eval-bubble';d.innerHTML=`<div class="eval-label">Evaluation</div><div style="margin-bottom:10px"><span style="font-family:'JetBrains Mono',monospace;font-size:1.2rem;font-weight:700;color:${c}">${score}/10</span></div>${cor?`<div style="margin-bottom:8px"><span style="font-size:0.6rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--accent2);display:block;margin-bottom:3px">✓ Correct</span>${ft(cor)}</div>`:''}${mis?`<div style="margin-bottom:8px"><span style="font-size:0.6rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--crisis);display:block;margin-bottom:3px">✗ Missed</span>${ft(mis)}</div>`:''}${nxt?`<div style="padding-top:8px;border-top:1px solid var(--border)"><span style="font-size:0.6rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--warn);display:block;margin-bottom:3px">⚡ Update</span>${ft(nxt)}</div>`:''}`;p.appendChild(d);scrollB('crisisMessages');}
+function renderCrisisDebrief(text){const p=document.getElementById('crisisMessages');const om=text.match(/OVERALL:\s*(\d+)\/10/i),sm=text.match(/SUMMARY:\s*(.+?)(?=KEY_LEARNING:|$)/is),lm=text.match(/KEY_LEARNING:\s*(.+?)(?=GUIDELINE:|$)/is),gm=text.match(/GUIDELINE:\s*(.+)/is);const score=om?om[1]:'?',sum=sm?sm[1].trim():'',learn=lm?lm[1].trim():'',guide=gm?gm[1].trim():'';const c=parseInt(score)>=8?'var(--accent2)':parseInt(score)>=5?'var(--warn)':'var(--crisis)';const d=document.createElement('div');d.className='debrief-card';d.innerHTML=`<div class="debrief-label">📋 Final Debrief</div><div style="font-family:'DM Serif Display',serif;font-size:2rem;color:${c};margin-bottom:8px">${score}/10</div>${sum?`<div style="margin-bottom:10px">${ft(sum)}</div>`:''}${learn?`<div style="padding:10px 12px;background:rgba(0,194,255,0.05);border:1px solid rgba(0,194,255,0.15);border-radius:7px;margin-bottom:8px"><span style="font-size:0.6rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--accent);display:block;margin-bottom:4px">Key Learning</span>${ft(learn)}</div>`:''}${guide?`<div style="font-size:0.75rem;color:var(--muted)">📖 ${ft(guide)}</div>`:''}`;p.appendChild(d);scrollB('crisisMessages');}
+
+// ══════════════════════════════════════════
+// MCQ
+// ══════════════════════════════════════════
+let mcqQs=[],mcqIdx=0,mcqCorrect=0,mcqWrongTopics={},mcqTotalDone=0,mcqTotalCorrect=0,mcqAnswered=false;
+function mcqLoadStats(){mcqTotalDone=parseInt(sessionStorage.getItem('mq_total')||'0');mcqTotalCorrect=parseInt(sessionStorage.getItem('mq_correct')||'0');mcqUpdateStats();}
+function mcqSaveStats(){sessionStorage.setItem('mq_total',mcqTotalDone);sessionStorage.setItem('mq_correct',mcqTotalCorrect);}
+function mcqUpdateStats(){document.getElementById('mcqTotal').textContent=mcqTotalDone;document.getElementById('mcqAcc').textContent=mcqTotalDone>0?Math.round((mcqTotalCorrect/mcqTotalDone)*100)+'%':'—';}
+async function mcqStart(){
+  if(!API_KEY){openApiModal();return;}
+  mcqQs=[];mcqIdx=0;mcqCorrect=0;mcqWrongTopics={};mcqAnswered=false;
+  const topic=document.getElementById('mcqTopic').value,diff=document.getElementById('mcqDiff').value,count=parseInt(document.getElementById('mcqCount').value);
+  document.getElementById('mcqStartBtn').disabled=true;
+  document.getElementById('mcqContent').innerHTML=`<div class="loading-card"><div class="ldots"><span></span><span></span><span></span></div><div>Generating ${count} questions on ${topic}…</div></div>`;
+  const sys=`Generate exactly ${count} MCQ questions on anaesthesiology topic: ${topic}, difficulty: ${diff} for DNB/MD Indian exam prep.\nReturn ONLY a valid JSON array. No markdown, no preamble.\n[\n  {\n    "q": "Question text",\n    "options": ["A. text","B. text","C. text","D. text"],\n    "correct": 0,\n    "explanation": "Detailed explanation",\n    "topic": "Sub-topic",\n    "difficulty": "Easy|Medium|Hard",\n    "ref": "Reference"\n  }\n]\ncorrect is 0-indexed. Include scenario-based questions, pharmacology, and guideline-based questions.`;
+  try{let raw=await callClaude(sys,[{role:'user',content:'Generate the MCQ questions now.'}]);raw=raw.replace(/```json|```/g,'').trim();mcqQs=JSON.parse(raw);if(!Array.isArray(mcqQs)||!mcqQs.length)throw new Error('Invalid');mcqShowQ();}
+  catch(err){document.getElementById('mcqContent').innerHTML=`<div class="loading-card" style="border-color:rgba(255,79,79,0.3)"><div style="font-size:1.3rem">⚠️</div><div style="color:var(--crisis)">${err.message}</div></div>`;}
+  document.getElementById('mcqStartBtn').disabled=false;
+}
+function mcqShowQ(){
+  if(mcqIdx>=mcqQs.length){mcqShowResults();return;}
+  mcqAnswered=false;const q=mcqQs[mcqIdx],L=['A','B','C','D'];
+  const dc=q.difficulty==='Easy'?'qde':q.difficulty==='Hard'?'qdh':'qdm';
+  const pct=Math.round((mcqIdx/mcqQs.length)*100);
+  document.getElementById('mcqContent').innerHTML=`
+    <div class="prog-wrap"><div class="prog-row"><span>Question <span class="qc-num">${mcqIdx+1}/${mcqQs.length}</span></span><span>${mcqCorrect} correct</span></div><div class="prog-track"><div class="prog-fill" style="width:${pct}%"></div></div></div>
+    <div class="q-card" id="qCard">
+      <div class="q-meta"><span class="q-topic">${q.topic||'Anaesthesiology'}</span><span class="q-diff ${dc}">${q.difficulty||'Medium'}</span></div>
+      <div class="q-text">${q.q}</div>
+      <div class="options" id="optGrid">${q.options.map((o,i)=>`<button class="opt-btn" id="opt${i}" onclick="mcqSelect(${i})"><span class="opt-letter">${L[i]}</span><span>${o.replace(/^[A-D]\.\s*/,'')}</span></button>`).join('')}</div>
+      <div class="flash" id="mcqFlash"></div>
+      <div class="expl" id="mcqExpl"><div class="expl-head">📖 Explanation</div><div id="explText"></div><div class="expl-ref" id="explRef"></div></div>
+      <button class="next-btn" id="mcqNext" onclick="mcqNext()">${mcqIdx+1<mcqQs.length?'Next →':'See Results →'}</button>
+    </div>`;
+}
+function mcqSelect(idx){
+  if(mcqAnswered)return;mcqAnswered=true;
+  const q=mcqQs[mcqIdx],cor=q.correct,ok=idx===cor,L=['A','B','C','D'];
+  for(let i=0;i<q.options.length;i++){const b=document.getElementById('opt'+i);b.disabled=true;if(i===cor)b.classList.add('oc');else if(i===idx&&!ok)b.classList.add('ow');}
+  document.getElementById('qCard').classList.add(ok?'qc':'qw');
+  const fl=document.getElementById('mcqFlash');fl.className='flash show '+(ok?'fc':'fw');fl.textContent=ok?'✓ Correct!':'✗ Incorrect. Answer is '+L[cor]+'.';
+  document.getElementById('explText').innerHTML=q.explanation||'';document.getElementById('explRef').textContent=q.ref?'📚 '+q.ref:'';document.getElementById('mcqExpl').classList.add('show');
+  document.getElementById('mcqNext').classList.add('show');
+  mcqTotalDone++;if(ok){mcqCorrect++;mcqTotalCorrect++;}else{const t=q.topic||'General';mcqWrongTopics[t]=(mcqWrongTopics[t]||0)+1;}
+  mcqSaveStats();mcqUpdateStats();
+}
+function mcqNext(){mcqIdx++;if(mcqIdx>=mcqQs.length)mcqShowResults();else mcqShowQ();}
+function mcqShowResults(){
+  const total=mcqQs.length,pct=Math.round((mcqCorrect/total)*100),wrong=total-mcqCorrect;
+  let emoji='🎉',color='var(--accent2)';if(pct<50){emoji='📚';color='var(--crisis)';}else if(pct<70){emoji='💪';color='var(--warn)';}else if(pct<85){emoji='👏';color='var(--accent)';}
+  const weakList=Object.entries(mcqWrongTopics).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([t,n])=>`<div>• ${t} <span style="color:var(--crisis)">(${n} wrong)</span></div>`).join('');
+  document.getElementById('mcqContent').innerHTML=`<div class="results-card"><div class="res-emoji">${emoji}</div><div class="res-score" style="color:${color}">${pct}%</div><div class="res-sub">${mcqCorrect}/${total} correct</div><div class="res-row"><div class="res-chip rc"><div class="rv">${mcqCorrect}</div><div class="rl">Correct</div></div><div class="res-chip rw"><div class="rv">${wrong}</div><div class="rl">Wrong</div></div><div class="res-chip rt"><div class="rv">${total}</div><div class="rl">Total</div></div></div>${weakList?`<div class="weak-box"><div class="weak-title">⚠️ Review These Topics</div>${weakList}</div>`:''}<button class="action-btn green" onclick="mcqStart()" style="min-width:160px">Practice Again</button></div>`;
+  const today=new Date().toDateString(),last=sessionStorage.getItem('mq_day');let streak=parseInt(sessionStorage.getItem('mq_streak')||'0');if(last!==today){streak++;sessionStorage.setItem('mq_streak',streak);sessionStorage.setItem('mq_day',today);}document.getElementById('mcqStreak').textContent=streak;
+}
+
+// ══════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════
+checkApiKey();
+renderDrugs();
+calcTIVA();
+mcqLoadStats();
+</script>
+
+<script>
+// ══════════════════════════════════════
+// BUILT-IN QUESTION BANK v2
+// 98 questions | 10 topics | Easy/Medium/Hard
+// Zero API calls — works completely offline
+// ══════════════════════════════════════
+var QUESTION_BANK = [{"q":"A 70-year-old patient with ejection fraction of 30% requires general anaesthesia. Which induction agent provides the most cardiovascular stability?","options":["Propofol 2mg/kg","Thiopentone 5mg/kg","Etomidate 0.3mg/kg","Ketamine 2mg/kg"],"correct":2,"explanation":"Etomidate causes minimal cardiovascular depression, making it the agent of choice for haemodynamically unstable or compromised patients. It has virtually no effect on cardiac output, heart rate, or SVR. The only concern is adrenal suppression with a single dose, acceptable for induction.","topic":"Pharmacology","difficulty":"Medium","ref":"Miller's Anaesthesia 9th Ed"},{"q":"Rocuronium 1.2mg/kg is given for RSI. The patient develops anaphylaxis intraoperatively. After resuscitation, which drug can immediately reverse the rocuronium?","options":["Neostigmine 0.08mg/kg","Sugammadex 16mg/kg","Atropine 0.02mg/kg","Wait for spontaneous recovery"],"correct":1,"explanation":"Sugammadex 16mg/kg immediately reverses even a full RSI dose of rocuronium within 3 minutes. This is the only agent that can reverse profound non-depolarising blockade instantly. Neostigmine cannot reverse deep block. This is the major advantage of rocuronium over succinylcholine in RSI.","topic":"Pharmacology","difficulty":"Hard","ref":"Miller's Anaesthesia 9th Ed Ch 29"},{"q":"Which opioid is most suitable for a patient with end-stage renal failure requiring analgesia during surgery?","options":["Morphine","Pethidine","Fentanyl","Tramadol"],"correct":2,"explanation":"Fentanyl is preferred in renal failure as it has no active metabolites that accumulate. Morphine's active metabolite M6G accumulates causing prolonged sedation. Pethidine's metabolite norpethidine causes seizures in renal failure. Tramadol also accumulates in renal failure.","topic":"Pharmacology","difficulty":"Medium","ref":"Morgan & Mikhail 6th Ed"},{"q":"The onset time of succinylcholine 1.5mg/kg IV is approximately:","options":["30-45 seconds","60-90 seconds","2-3 minutes","5 minutes"],"correct":0,"explanation":"Succinylcholine has the fastest onset of any neuromuscular blocking agent — 30-45 seconds to complete paralysis. This is why it remains valuable for RSI despite its side effect profile. Rocuronium at 1.2mg/kg takes approximately 60 seconds.","topic":"Pharmacology","difficulty":"Easy","ref":"Miller's Anaesthesia 9th Ed"},{"q":"A patient requires reversal of vecuronium. TOF ratio is 0.3. The MOST appropriate reversal is:","options":["Neostigmine 0.04mg/kg + Glycopyrrolate 0.01mg/kg","Sugammadex 2mg/kg","Sugammadex 4mg/kg","Wait until TOF ratio reaches 0.9"],"correct":0,"explanation":"At TOF ratio 0.3 (T2 recovery), neostigmine 0.04-0.08mg/kg + anticholinergic is appropriate. Sugammadex 2mg/kg is for moderate rocuronium block, 4mg/kg for deep block. Vecuronium can be reversed with neostigmine at moderate block. Never reverse block below T2 with neostigmine.","topic":"Pharmacology","difficulty":"Hard","ref":"AIDAA Guidelines"},{"q":"Which local anaesthetic has the highest risk of cardiac toxicity?","options":["Lignocaine","Ropivacaine","Bupivacaine","Prilocaine"],"correct":2,"explanation":"Bupivacaine has the highest cardiac toxicity among local anaesthetics due to its high lipid solubility and slow dissociation from cardiac sodium channels ('fast in, slow out'). Cardiotoxicity can be refractory to resuscitation. Ropivacaine is the safer alternative for epidurals.","topic":"Pharmacology","difficulty":"Easy","ref":"AAGBI LAST Guidelines 2023"},{"q":"Ketamine 1-2mg/kg IV causes all of the following EXCEPT:","options":["Bronchodilation","Increased ICP","Cardiovascular stimulation","Respiratory depression at standard doses"],"correct":3,"explanation":"Ketamine at standard induction doses (1-2mg/kg IV) maintains respiratory drive and airway reflexes — this is unique among induction agents. It causes bronchodilation (useful in asthma), cardiovascular stimulation (increases HR, BP, cardiac output), and increases ICP (caution in head injury).","topic":"Pharmacology","difficulty":"Medium","ref":"Morgan & Mikhail 6th Ed"},{"q":"Dexmedetomidine acts on which receptor?","options":["Alpha-1 adrenergic","Alpha-2 adrenergic","Beta-1 adrenergic","Mu opioid"],"correct":1,"explanation":"Dexmedetomidine is a highly selective alpha-2 adrenergic agonist (alpha-2:alpha-1 selectivity ratio 1600:1). It provides sedation, analgesia, and anxiolysis without respiratory depression. It decreases noradrenaline release from locus coeruleus. Useful for ICU sedation, awake intubation, and opioid-sparing.","topic":"Pharmacology","difficulty":"Easy","ref":"Miller's Anaesthesia 9th Ed"},{"q":"Which volatile anaesthetic should be AVOIDED in a patient with known susceptibility to malignant hyperthermia?","options":["Nitrous oxide","Propofol infusion","Sevoflurane","Remifentanil"],"correct":2,"explanation":"All halogenated volatile agents (sevoflurane, desflurane, isoflurane, halothane) are potent triggers of malignant hyperthermia and are absolutely contraindicated. Nitrous oxide, propofol, opioids, benzodiazepines, and non-depolarising relaxants are safe. Total IV anaesthesia (TIVA) is the technique of choice.","topic":"Pharmacology","difficulty":"Easy","ref":"EMHG Guidelines 2020"},{"q":"Tramadol 100mg IV causes nausea and vomiting most likely due to:","options":["Histamine release","Stimulation of chemoreceptor trigger zone","Reduced gastric motility","Direct vestibular stimulation"],"correct":1,"explanation":"Tramadol (and all opioids) cause nausea/vomiting primarily by stimulating mu and delta receptors in the chemoreceptor trigger zone (CTZ) in the area postrema. They also delay gastric emptying. Tramadol additionally inhibits serotonin reuptake which may contribute to nausea.","topic":"Pharmacology","difficulty":"Medium","ref":"Morgan & Mikhail 6th Ed"},{"q":"Phenylephrine is used to treat spinal hypotension. Its mechanism is:","options":["Alpha-1 agonist — increases SVR","Beta-1 agonist — increases cardiac output","Alpha-2 agonist — centrally mediated","Mixed alpha-beta agonist"],"correct":0,"explanation":"Phenylephrine is a pure alpha-1 adrenergic agonist causing peripheral vasoconstriction and increased SVR, restoring BP without direct cardiac effects. It may cause reflex bradycardia. Preferred over ephedrine in obstetrics as it maintains uteroplacental blood flow without fetal acidosis.","topic":"Pharmacology","difficulty":"Easy","ref":"SOAP 2019 Consensus Statement"},{"q":"Metaraminol works by:","options":["Direct alpha-1 agonism only","Indirect release of noradrenaline and direct alpha agonism","Pure beta-1 stimulation","Inhibition of catecholamine reuptake"],"correct":1,"explanation":"Metaraminol acts both directly (alpha-1 agonism) and indirectly (displaces noradrenaline from storage vesicles). It increases SVR and can cause reflex bradycardia. Commonly used in spinal hypotension in non-obstetric patients. Tachyphylaxis can occur with repeated doses.","topic":"Pharmacology","difficulty":"Medium","ref":"Morgan & Mikhail 6th Ed"},{"q":"Which drug is used to treat 'cannot intubate cannot oxygenate' situation when all airway devices have failed?","options":["Succinylcholine","Sugammadex to reverse neuromuscular blockade","Emergency front of neck access (FONA)","High flow nasal oxygen"],"correct":2,"explanation":"CICO (Cannot Intubate Cannot Oxygenate) is a life-threatening emergency. After failed supraglottic rescue, emergency front of neck access (surgical cricothyroidotomy) is mandatory. This is the final step of the difficult airway algorithm. AIDAA 2025 and DAS 2025 both mandate this as the definitive rescue.","topic":"Pharmacology","difficulty":"Hard","ref":"AIDAA 2025 / DAS 2025 Guidelines"},{"q":"Ondansetron prevents postoperative nausea by blocking which receptors?","options":["Dopamine D2 receptors","5-HT3 serotonin receptors","Histamine H1 receptors","Muscarinic receptors"],"correct":1,"explanation":"Ondansetron is a selective 5-HT3 (serotonin type 3) receptor antagonist. It blocks vagal afferents in the gut and serotonin receptors in the CTZ. Most effective when given at end of surgery (30 min before emergence). First-line antiemetic in anaesthesia.","topic":"Pharmacology","difficulty":"Easy","ref":"Apfel PONV Guidelines"},{"q":"The LEMON assessment for difficult intubation stands for:","options":["Look, Evaluate, Mallampati, Obstruction, Neck mobility","Length, Exposure, Mouth, Oropharynx, Nares","Look externally, Evaluate, Mallampati, Obesity, Nares","Laryngoscopy, Epiglottis, Mallampati, Obstruction, Neck"],"correct":0,"explanation":"LEMON: Look externally (dysmorphic features, trauma), Evaluate 3-3-2 rule (mouth opening ≥3 fingers, hyoid-chin ≥3 fingers, thyroid-floor of mouth ≥2 fingers), Mallampati class, Obstruction (epiglottitis, angioedema, trauma), Neck mobility. Predicts difficult direct laryngoscopy.","topic":"Airway Management","difficulty":"Easy","ref":"AIDAA 2025 Guidelines"},{"q":"A patient with Mallampati class IV, mouth opening of 2cm, and thyromental distance of 5cm. The safest anaesthetic technique is:","options":["RSI with propofol and succinylcholine","Gas induction with sevoflurane","Awake fibreoptic intubation under local anaesthesia","Spinal anaesthesia if surgery permits"],"correct":2,"explanation":"Multiple predictors of difficult airway (Mallampati IV, reduced mouth opening, short thyromental distance) — this is a predicted difficult airway. Gold standard is awake fibreoptic intubation, maintaining the patient's own airway throughout. Inducing anaesthesia risks losing the airway entirely.","topic":"Airway Management","difficulty":"Hard","ref":"AIDAA 2025 Difficult Airway Guidelines"},{"q":"The LMA ProSeal differs from the classic LMA in that it:","options":["Has a larger cuff","Has a drain tube allowing passage of a gastric tube","Can be used for longer surgeries","Has a reinforced shaft"],"correct":1,"explanation":"LMA ProSeal has a second lumen (drain tube) that allows gastric tube insertion for drainage, reducing aspiration risk. It provides better oropharyngeal seal pressure (up to 30 cmH2O vs 20 for classic LMA), making it suitable for laparoscopic and longer procedures.","topic":"Airway Management","difficulty":"Medium","ref":"Miller's Anaesthesia 9th Ed"},{"q":"After successful RSI intubation, the MOST reliable method to confirm endotracheal tube position is:","options":["Auscultation of breath sounds bilaterally","Chest rise with ventilation","Continuous capnography waveform","SpO2 remaining above 95%"],"correct":2,"explanation":"Continuous waveform capnography (end-tidal CO2) is the gold standard for confirming and continuously monitoring ETT position. It provides real-time confirmation with every breath. Auscultation and chest rise can be misleading (oesophageal intubation with gas from stomach). SpO2 may remain high for minutes after oesophageal intubation.","topic":"Airway Management","difficulty":"Easy","ref":"AAGBI / DAS Guidelines"},{"q":"Video laryngoscopy compared to direct laryngoscopy:","options":["Always results in faster intubation","Improves glottic view but may not always improve intubation success","Is contraindicated in blood-stained airways","Eliminates the need for muscle relaxants"],"correct":1,"explanation":"Video laryngoscopy consistently improves the glottic view (better Cormack-Lehane grade) but this does not always translate to faster or more successful intubation — the altered angle requires technique adjustment. It is valuable in difficult airways but requires practice. Blood and secretions can obscure the camera.","topic":"Airway Management","difficulty":"Medium","ref":"DAS 2025 Guidelines"},{"q":"During tracheal intubation, the ETT cuff should be inflated to:","options":["Maximum volume until no leak","Minimum volume to achieve a seal — typically 20-30 cmH2O","Exactly 10ml in all adults","As much as possible to prevent aspiration"],"correct":1,"explanation":"ETT cuff pressure should be maintained at 20-30 cmH2O — enough to achieve a seal but below capillary perfusion pressure of tracheal mucosa (~30 cmH2O). Over-inflation (>30 cmH2O) causes tracheal mucosal ischaemia and necrosis. Always check with a manometer.","topic":"Airway Management","difficulty":"Medium","ref":"Miller's Anaesthesia 9th Ed"},{"q":"Extubation of the difficult airway patient should ideally be performed:","options":["In the fully awake state with protective reflexes","Under deep anaesthesia to prevent coughing","In the lateral position always","Only after administering neostigmine"],"correct":0,"explanation":"Difficult airway extubation should be performed with the patient fully awake, responding to commands, with adequate protective airway reflexes. The risk is re-intubation if problems occur. An airway exchange catheter may be left in situ. The 'cannot re-intubate' scenario after extubation is as dangerous as primary difficult intubation.","topic":"Airway Management","difficulty":"Hard","ref":"DAS Extubation Guidelines 2025"},{"q":"The cricothyroid membrane is located:","options":["Above the thyroid cartilage","Between thyroid and cricoid cartilages","Below the cricoid cartilage","Between the cricoid and first tracheal ring"],"correct":1,"explanation":"The cricothyroid membrane lies between the inferior border of the thyroid cartilage and the superior border of the cricoid cartilage. It is the site of emergency surgical airway access (cricothyroidotomy) as it is superficial, avascular, and easily palpable. Identify by palpating the thyroid cartilage notch downward.","topic":"Airway Management","difficulty":"Easy","ref":"AIDAA 2025 Guidelines"},{"q":"Apnoeic oxygenation during intubation attempts works because:","options":["It delivers oxygen via diffusion into the alveoli despite no breathing","The patient continues to breathe unconsciously","Oxygen is absorbed through the tracheal mucosa","It reverses laryngospasm"],"correct":0,"explanation":"During apnoea, CO2 accumulates (~3-4 mmHg/min) but oxygen continues to flow from alveoli into pulmonary circulation by mass movement ('apnoeic oxygenation' or diffusion oxygenation). High-flow nasal oxygen (15-70 L/min) via HFNO maintains oxygen reservoir, extending safe apnoea time significantly.","topic":"Airway Management","difficulty":"Hard","ref":"AIDAA 2025 Guidelines"},{"q":"In laryngospasm during paediatric emergence, the FIRST action after calling for help is:","options":["Succinylcholine 1.5mg/kg IV immediately","Apply CPAP with 100% O2 and jaw thrust","Reintubate immediately","Give neostigmine"],"correct":1,"explanation":"Laryngospasm management: FIRST apply continuous positive pressure with 100% O2, jaw thrust, and Larson's manoeuvre (firm pressure in laryngospasm notch behind ear). This often breaks partial laryngospasm. If complete laryngospasm persists with desaturation — succinylcholine 0.5-1mg/kg IV or 4mg/kg IM. Propofol 0.5mg/kg may help partial spasm.","topic":"Airway Management","difficulty":"Hard","ref":"APAGBI Paediatric Airway Guidelines"},{"q":"The 3-3-2 rule for airway assessment involves:","options":["3 finger mouth opening, 3 finger hyoid-chin distance, 2 finger thyroid notch to floor of mouth","3 Mallampati classes, 3cm thyromental distance, 2cm mouth opening","3 neck movements, 3cm neck circumference, 2cm jaw protrusion","None of the above"],"correct":0,"explanation":"3-3-2 rule predicts difficult laryngoscopy: interincisor gap ≥3 finger widths (adequate mouth opening), hyoid-mental distance ≥3 finger widths (tongue space), thyroid notch to floor of mouth ≥2 finger widths (laryngeal position). If any component fails, expect difficulty.","topic":"Airway Management","difficulty":"Medium","ref":"AIDAA 2025 Guidelines"},{"q":"Which nerve block is associated with unilateral phrenic nerve palsy in 100% of cases?","options":["Axillary block","Supraclavicular block","Interscalene block","Infraclavicular block"],"correct":2,"explanation":"Interscalene brachial plexus block invariably causes ipsilateral phrenic nerve palsy (C3-C5 roots in close proximity) reducing pulmonary function by ~25%. It is relatively contraindicated in patients with severe COPD, contralateral phrenic palsy, or severe respiratory compromise. Always consider this before the block.","topic":"Airway Management","difficulty":"Medium","ref":"NYSORA Guidelines"},{"q":"A ventilated patient in ICU has plateau pressure of 32 cmH2O and PEEP of 8 cmH2O. The driving pressure is:","options":["32 cmH2O","40 cmH2O","24 cmH2O","8 cmH2O"],"correct":2,"explanation":"Driving pressure = Plateau pressure - PEEP = 32 - 8 = 24 cmH2O. Driving pressure reflects the stress applied to the lung parenchyma per breath. Evidence shows driving pressure >15 cmH2O is associated with increased ARDS mortality. Minimising driving pressure (not just tidal volume) is now a key target.","topic":"Critical Care","difficulty":"Hard","ref":"Amato et al., NEJM 2015"},{"q":"The Surviving Sepsis Campaign 1-hour bundle includes all EXCEPT:","options":["Blood cultures before antibiotics","Broad spectrum antibiotics within 1 hour","30 ml/kg IV crystalloid bolus if hypotensive","CT scan to identify source of infection"],"correct":3,"explanation":"SSC 2018 Hour-1 Bundle: measure lactate, obtain blood cultures BEFORE antibiotics, administer broad-spectrum antibiotics, 30ml/kg crystalloid for hypotension or lactate ≥4, apply vasopressors if refractory. CT scan is NOT part of the initial bundle — it should not delay resuscitation.","topic":"Critical Care","difficulty":"Medium","ref":"Surviving Sepsis Campaign 2021"},{"q":"PEEP in a ventilated patient primarily helps by:","options":["Increasing tidal volume","Preventing alveolar collapse at end-expiration and improving oxygenation","Reducing airway resistance","Decreasing work of breathing always"],"correct":1,"explanation":"PEEP (Positive End-Expiratory Pressure) prevents alveolar derecruitment (collapse) at end-expiration, increasing functional residual capacity and improving V/Q matching and oxygenation. It may also reduce lung injury by preventing repetitive opening and closing (atelectrauma). Excessive PEEP causes barotrauma and reduces cardiac output.","topic":"Critical Care","difficulty":"Easy","ref":"ARDSNet Ventilation Strategy"},{"q":"A patient in septic shock fails to respond to 3L of crystalloid and noradrenaline at 0.5 mcg/kg/min. The NEXT agent to add is:","options":["Increase noradrenaline to maximum dose","Add vasopressin 0.03 units/min","Start dobutamine","Give hydrocortisone 200mg/day"],"correct":1,"explanation":"SSC 2021 recommends vasopressin (0.03-0.04 units/min) as a second vasopressor to either reduce noradrenaline dose or for refractory shock. Hydrocortisone 200mg/day is recommended if haemodynamic goals not achieved despite adequate fluids and vasopressors (corticosteroid-refractory shock). Dobutamine for cardiac dysfunction.","topic":"Critical Care","difficulty":"Hard","ref":"Surviving Sepsis Campaign 2021"},{"q":"Normal CVP (Central Venous Pressure) range in a spontaneously breathing patient is:","options":["0-2 mmHg","2-8 mmHg","10-15 mmHg","15-20 mmHg"],"correct":1,"explanation":"Normal CVP is 2-8 mmHg in a spontaneously breathing patient (5-10 cmH2O). Values must be interpreted in clinical context — CVP alone is a poor predictor of fluid responsiveness. Dynamic measures (pulse pressure variation, stroke volume variation during mechanical ventilation) are more reliable.","topic":"Critical Care","difficulty":"Easy","ref":"Miller's Anaesthesia 9th Ed"},{"q":"A patient on mechanical ventilation has PaO2 of 60 mmHg on FiO2 of 0.6. The P/F ratio is:","options":["100","36","360","600"],"correct":0,"explanation":"P/F ratio (Horowitz ratio) = PaO2/FiO2 = 60/0.6 = 100. P/F ratio <100 = severe ARDS, 100-200 = moderate ARDS, 200-300 = mild ARDS, >300 = normal. This patient has severe ARDS by Berlin criteria. Consider prone positioning, neuromuscular blockade, and ECMO referral.","topic":"Critical Care","difficulty":"Medium","ref":"Berlin Definition 2012"},{"q":"Prone positioning in ARDS improves oxygenation mainly by:","options":["Increasing FRC only","Redistributing perfusion to better ventilated dorsal lung regions and recruiting dependent alveoli","Decreasing cardiac output","Reducing metabolic demands"],"correct":1,"explanation":"Prone positioning homogenises ventilation-perfusion matching. In the supine position, dependent dorsal alveoli collapse while ventral alveoli are overinflated. Prone position recruits dorsal alveoli and redistributes perfusion, dramatically improving P/F ratio. PROSEVA trial showed mortality benefit when P/F <150 for >16 hours/day.","topic":"Critical Care","difficulty":"Hard","ref":"PROSEVA Trial, NEJM 2013"},{"q":"Daily sedation interruption (awakening trial) in ICU patients is recommended because:","options":["It reduces delirium, shortens duration of ventilation, and ICU stay","It increases risk of self-extubation","It worsens anxiety and PTSD","It should only be done in surgical ICU"],"correct":0,"explanation":"ABCDE bundle includes daily sedation interruption (Awakening trial) + Breathing trial (SAT + SBT). This approach reduces duration of mechanical ventilation, ICU length of stay, and mortality. Kress et al. trial showed significant benefit. Prevents ICU-acquired weakness and delirium from over-sedation.","topic":"Critical Care","difficulty":"Medium","ref":"Kress et al., NEJM 2000 / ABCDE Bundle"},{"q":"Which diuretic is first-line for acute pulmonary oedema?","options":["Hydrochlorothiazide","Spironolactone","Furosemide IV","Mannitol"],"correct":2,"explanation":"IV furosemide (frusemide) is the first-line diuretic for acute pulmonary oedema. It has an immediate venodilatory effect within minutes (before diuresis begins), reducing preload. Diuresis begins in 15-20 minutes. Dose 40-80mg IV initially. Monitor urine output, electrolytes, and renal function.","topic":"Critical Care","difficulty":"Easy","ref":"ESC Heart Failure Guidelines 2021"},{"q":"High anion gap metabolic acidosis is seen in all EXCEPT:","options":["Diabetic ketoacidosis","Lactic acidosis","Methanol poisoning","Normal saline infusion"],"correct":3,"explanation":"Normal saline infusion causes hyperchloraemic metabolic acidosis with NORMAL anion gap (AG = Na - Cl - HCO3 = normal ~12). High AG acidosis: DKA, lactic acidosis, renal failure, methanol/ethylene glycol, salicylates (MUDPILES mnemonic). AG >12 indicates unmeasured anions.","topic":"Critical Care","difficulty":"Medium","ref":"Physiology of Acid-Base"},{"q":"Transpulmonary pressure is defined as:","options":["Airway pressure minus atmospheric pressure","Plateau pressure minus PEEP","Alveolar pressure minus pleural pressure","Peak pressure minus PEEP"],"correct":2,"explanation":"Transpulmonary pressure = Alveolar pressure - Pleural pressure. It represents the distending force across the lung. Oesophageal manometry estimates pleural pressure. In obese patients and ARDS, pleural pressure is elevated, so standard PEEP may not prevent alveolar collapse — oesophageal-guided PEEP may be needed.","topic":"Critical Care","difficulty":"Hard","ref":"Talmor et al., NEJM 2008"},{"q":"The MOST important initial intervention in a patient with tension pneumothorax under GA is:","options":["Urgent chest X-ray","Needle decompression of the affected side immediately","Insert chest drain and connect to underwater seal","Increase FiO2 to 100%"],"correct":1,"explanation":"Tension pneumothorax is a CLINICAL diagnosis — cardiovascular collapse, absent breath sounds, tracheal deviation, increased airway pressures, desaturation. Do NOT wait for CXR. Immediate needle decompression in 2nd intercostal space, midclavicular line. Follow with chest drain. Every second counts.","topic":"Critical Care","difficulty":"Hard","ref":"ATLS / Emergency Medicine Guidelines"},{"q":"For a spinal anaesthetic for hip replacement surgery in a 70-year-old, the appropriate level of block required is:","options":["T4","T8","T10","T12"],"correct":2,"explanation":"Hip replacement requires a block to T10 (umbilicus level) to cover the hip joint (L2-L3 innervation), thigh, and tourniquet pain. T4 (nipple level) is needed for upper abdominal surgery. T6 for lower abdominal. T10 for hip, knee, lower limb, and LSCS.","topic":"Regional Anaesthesia","difficulty":"Medium","ref":"Morgan & Mikhail 6th Ed"},{"q":"The epidural space contains all EXCEPT:","options":["Fat","Venous plexuses","Nerve roots","Cerebrospinal fluid"],"correct":3,"explanation":"The epidural space (between ligamentum flavum and dura) contains: fat, venous plexuses (Batson's plexus), lymphatics, nerve roots as they exit, and spinal arteries. It does NOT contain CSF — that is in the subarachnoid space. Accidental dural puncture enters the CSF compartment.","topic":"Regional Anaesthesia","difficulty":"Easy","ref":"Morgan & Mikhail 6th Ed"},{"q":"A patient develops a post-dural puncture headache (PDPH) after epidural. Conservative management fails. The definitive treatment is:","options":["IV caffeine","Oral analgesics for 2 weeks","Epidural blood patch","IV hydration and bed rest"],"correct":2,"explanation":"Epidural blood patch (EBP) is the gold standard treatment for PDPH. 15-20ml of autologous blood is injected into the epidural space at the same level, forming a clot that seals the dural hole. 90% success rate with first patch. Consider at 24-48 hours if conservative measures fail.","topic":"Regional Anaesthesia","difficulty":"Medium","ref":"OAA PDPH Guidelines"},{"q":"The test dose for epidural catheter confirmation uses:","options":["1ml 0.5% bupivacaine","3ml 2% lignocaine with 1:200,000 adrenaline","5ml normal saline","2ml 0.25% ropivacaine"],"correct":1,"explanation":"Standard epidural test dose: 3ml of 2% lignocaine with adrenaline 1:200,000 (15mcg adrenaline). Intravascular injection: rapid heart rate increase >20bpm within 45 seconds (adrenaline marker). Intrathecal injection: dense motor block within 5 minutes (spinal dose of lignocaine). Always aspirate and give test dose before any epidural.","topic":"Regional Anaesthesia","difficulty":"Hard","ref":"Morgan & Mikhail 6th Ed"},{"q":"Femoral nerve block provides anaesthesia to:","options":["Entire leg below knee","Anterior thigh and medial leg below knee","Posterior thigh only","Entire lower limb"],"correct":1,"explanation":"The femoral nerve (L2-L4) innervates: anterior thigh (skin and quadriceps muscle), medial leg below knee (saphenous nerve branch), and knee joint (contributes to 3-in-1 block). For complete lower limb block, sciatic nerve (posterior thigh, entire leg below knee except medial) must also be blocked.","topic":"Regional Anaesthesia","difficulty":"Medium","ref":"NYSORA / Hadzic's Regional Anaesthesia"},{"q":"Absolute contraindication to spinal anaesthesia is:","options":["Previous back surgery","Mild coagulopathy (INR 1.3)","Patient refusal","Moderate hypertension"],"correct":2,"explanation":"Patient refusal is an absolute contraindication to any regional technique — informed consent is mandatory. Other absolute contraindications: severe coagulopathy, patient on anticoagulants (check timing), skin infection at site, severe hypovolaemia, increased ICP. Previous back surgery, mild hypertension, and controlled cardiovascular disease are relative contraindications.","topic":"Regional Anaesthesia","difficulty":"Easy","ref":"ASRA Guidelines 2018"},{"q":"Unilateral spinal block after hyperbaric bupivacaine is achieved by:","options":["Using a larger dose","Keeping patient sitting for 10 minutes after injection","Injecting very slowly with patient lateral, operative side dependent","Using isobaric solution"],"correct":2,"explanation":"For unilateral spinal: use hyperbaric (heavy) bupivacaine, inject slowly with the patient in lateral decubitus position with the operative side DOWN (dependent side gets higher concentration due to baricity), and keep the patient lateral for 10-15 minutes before turning supine. Ideal for unilateral hip or knee surgery.","topic":"Regional Anaesthesia","difficulty":"Hard","ref":"Morgan & Mikhail 6th Ed"},{"q":"ASRA guidelines recommend stopping clopidogrel before neuraxial block for:","options":["24 hours","48 hours","5-7 days","14 days"],"correct":2,"explanation":"Clopidogrel must be stopped 5-7 days before neuraxial anaesthesia (ASRA 2018). Prasugrel: 7-10 days. Ticagrelor: 5 days. Aspirin alone: no contraindication. Timing is critical to prevent epidural haematoma — a rare but devastating complication causing paraplegia.","topic":"Regional Anaesthesia","difficulty":"Medium","ref":"ASRA Regional Anaesthesia Guidelines 2018"},{"q":"Spinal anaesthesia is preferred over epidural for LSCS because:","options":["It can be extended if surgery is prolonged","Faster onset, denser block, simpler technique, lower local anaesthetic dose","Lower risk of hypotension","Better for emergency cases always"],"correct":1,"explanation":"Spinal for LSCS: faster onset (3-5 min vs 15-20 min), denser and more reliable block, single shot technique (simpler), much lower LA dose (2-3ml vs 15-20ml epidural), lower risk of LA toxicity. Epidural is preferred when prolonged surgery anticipated, or labour epidural top-up is used for emergency LSCS.","topic":"Regional Anaesthesia","difficulty":"Medium","ref":"OAA Guidelines 2023"},{"q":"Which nerve is most commonly injured during lithotomy positioning?","options":["Sciatic nerve","Common peroneal nerve","Femoral nerve","Obturator nerve"],"correct":1,"explanation":"Common peroneal nerve (branch of sciatic at fibular head) is most vulnerable in lithotomy position due to compression against the fibular head by leg holders. Presents as foot drop and loss of dorsiflexion. Prevention: careful padding of fibular head, avoid excessive hip flexion and external rotation, time-limited lithotomy.","topic":"Regional Anaesthesia","difficulty":"Medium","ref":"Miller's Anaesthesia 9th Ed"},{"q":"In a patient with severe aortic stenosis (valve area 0.7 cm²) presenting for non-cardiac surgery, the haemodynamic goal is:","options":["Maintain high heart rate, reduce afterload","Maintain normal sinus rhythm, avoid hypotension, maintain preload","Reduce preload aggressively with diuretics","Allow heart rate to increase to maintain cardiac output"],"correct":1,"explanation":"Severe AS haemodynamic goals: maintain sinus rhythm (AF poorly tolerated — loss of atrial kick reduces CO by 40%), maintain adequate preload (fixed obstruction requires adequate filling), avoid hypotension (coronary perfusion dependent on diastolic BP), avoid tachycardia (reduces diastolic filling time). Spinal anaesthesia is relatively contraindicated.","topic":"Cardiac Anaesthesia","difficulty":"Hard","ref":"ESC/ESA Non-cardiac Surgery Guidelines 2022"},{"q":"The Lee Revised Cardiac Risk Index (RCRI) includes all EXCEPT:","options":["High-risk surgery","History of ischaemic heart disease","Diabetes on insulin","Obesity BMI > 35"],"correct":3,"explanation":"RCRI (Lee Index) 6 factors: high-risk surgery, ischaemic heart disease (IHD), congestive heart failure, cerebrovascular disease, diabetes on insulin, creatinine >170 μmol/L. Obesity is NOT in the RCRI. Score ≥3 indicates high cardiac risk (>10%) for major adverse cardiac events (MACE).","topic":"Cardiac Anaesthesia","difficulty":"Medium","ref":"ESC/ESA Non-cardiac Surgery Guidelines 2022"},{"q":"Functional capacity is expressed in METs. A patient who can climb two flights of stairs has approximately:","options":["1 MET","4 METs","7 METs","10 METs"],"correct":1,"explanation":"MET (Metabolic Equivalent of Task): 1 MET = resting oxygen consumption. 4 METs = climbing one flight of stairs, walking on level ground at 4mph, light housework. 7-10 METs = strenuous activity. >4 METs functional capacity = acceptable perioperative risk. Inability to achieve 4 METs predicts higher cardiac risk.","topic":"Cardiac Anaesthesia","difficulty":"Easy","ref":"ACC/AHA Perioperative Guidelines"},{"q":"Which anaesthetic agent reduces myocardial oxygen demand by all four determinants?","options":["Ketamine","Volatile anaesthetics (isoflurane, sevoflurane)","Propofol","High-dose fentanyl"],"correct":1,"explanation":"Volatile anaesthetics reduce all 4 determinants of myocardial O2 demand: heart rate (mild reduction), preload (vasodilation), afterload (vasodilation, SVR reduction), contractility (negative inotropy). They also provide ischaemic preconditioning. Considered cardioprotective in cardiac surgery. High-dose fentanyl reduces HR but not afterload significantly.","topic":"Cardiac Anaesthesia","difficulty":"Hard","ref":"Miller's Anaesthesia 9th Ed"},{"q":"Mitral stenosis (valve area 1.0 cm²) haemodynamic management requires:","options":["Maintain high heart rate to increase forward flow","Slow heart rate, maintain sinus rhythm, avoid fluid overload","Reduce afterload aggressively","Allow atrial fibrillation — better tolerated than in other lesions"],"correct":1,"explanation":"Mitral stenosis goals: SLOW heart rate (more time for ventricular filling through stenotic valve), maintain sinus rhythm (AF with fast ventricular rate causes acute decompensation), avoid volume overload (fixed obstruction — cannot handle extra preload), avoid hypoxia and hypercapnia (increase pulmonary hypertension).","topic":"Cardiac Anaesthesia","difficulty":"Hard","ref":"ESC/ESA Guidelines 2022"},{"q":"Normal pulmonary artery wedge pressure (PAWP) is:","options":["2-8 mmHg","8-12 mmHg","15-20 mmHg","20-25 mmHg"],"correct":1,"explanation":"Normal PAWP (PCWP) is 8-12 mmHg. It reflects left atrial pressure and left ventricular end-diastolic pressure (preload). PAWP >18 mmHg suggests left heart failure/pulmonary oedema. PAWP <8 suggests hypovolaemia. Measured via pulmonary artery catheter (Swan-Ganz).","topic":"Cardiac Anaesthesia","difficulty":"Easy","ref":"Miller's Anaesthesia 9th Ed"},{"q":"Heparin is given before cardiopulmonary bypass. Adequacy of anticoagulation is monitored by:","options":["INR > 2.5","APTT > 300 seconds","ACT (Activated Clotting Time) > 480 seconds","Anti-Xa levels > 1.5 IU/ml"],"correct":2,"explanation":"ACT (Activated Clotting Time) is used to monitor heparin adequacy during CPB. Target ACT > 480 seconds (or > 400 seconds in some centres) before initiating bypass. Normal ACT is 80-120 seconds. ACT is point-of-care and provides rapid results. Protamine reversal should achieve ACT within 10% of baseline.","topic":"Cardiac Anaesthesia","difficulty":"Hard","ref":"Society of Thoracic Surgeons Guidelines"},{"q":"Low cardiac output syndrome after cardiac surgery is FIRST treated with:","options":["Immediate IABP insertion","Optimise preload, rate, rhythm — then inotropes if needed","High-dose noradrenaline","Emergency re-sternotomy"],"correct":1,"explanation":"Systematic approach to low CO post-cardiac surgery: 1) Optimise preload (CVP/PAWP target), 2) Optimise heart rate and rhythm (pacing if needed, cardioversion if AF), 3) Reduce afterload if SVR high, 4) Add inotropes (dobutamine, milrinone) if needed, 5) Consider IABP for refractory cases. Don't jump to invasive support first.","topic":"Cardiac Anaesthesia","difficulty":"Medium","ref":"Society of Thoracic Surgeons Guidelines"},{"q":"The Paediatric Advanced Life Support (PALS) dose of adrenaline for cardiac arrest is:","options":["0.1mg/kg IV","0.01mg/kg IV (0.1ml/kg of 1:10,000)","0.5mg IM","1mg IV flat dose"],"correct":1,"explanation":"Paediatric adrenaline for cardiac arrest: 0.01mg/kg IV/IO of 1:10,000 solution (= 0.1ml/kg of 1:10,000). Maximum single dose 1mg. Repeat every 3-5 minutes. IO (intraosseous) route is equivalent to IV if IV access unavailable. Adult dose (1mg flat) is NOT used in children.","topic":"Paediatric Anaesthesia","difficulty":"Easy","ref":"PALS Guidelines 2020"},{"q":"A 3-year-old child (weight 15kg) requires intubation. The appropriate ETT internal diameter using the Cole's formula is:","options":["3.5mm","4.0mm","4.5mm","5.0mm"],"correct":1,"explanation":"Cole's formula for uncuffed ETT: (Age/4) + 4. For 3-year-old: (3/4) + 4 = 4.75, approximately 4.5mm. However cuffed ETT formula: (Age/4) + 3.5 = 4.25, approximately 4.0mm. Modern practice uses cuffed tubes from infancy. Always have ±0.5mm available. Check for air leak at 20-25 cmH2O.","topic":"Paediatric Anaesthesia","difficulty":"Medium","ref":"APAGBI Guidelines"},{"q":"Normal respiratory rate for a 6-month-old infant is:","options":["12-20 breaths/minute","20-30 breaths/minute","30-40 breaths/minute","40-60 breaths/minute"],"correct":2,"explanation":"Normal respiratory rates by age: Neonate: 40-60, Infant (1-12 months): 30-40, Toddler (1-3 years): 25-35, Preschool (3-6 years): 22-30, School age (6-12): 18-25, Adolescent: 12-20. Infants have higher metabolic rate and oxygen consumption per kg, necessitating faster breathing.","topic":"Paediatric Anaesthesia","difficulty":"Easy","ref":"APLS Guidelines"},{"q":"Inhalational induction with sevoflurane is preferred in children because:","options":["It has a lower MAC than in adults","Pleasant odour, rapid induction, acceptable cardiovascular profile","It avoids the need for IV access entirely","It prevents laryngospasm completely"],"correct":1,"explanation":"Sevoflurane advantages for paediatric inhalational induction: non-pungent sweet odour (unlike isoflurane/desflurane), rapid induction due to low blood-gas solubility, minimal cardiovascular depression, bronchodilatory. IV access can be established after induction. MAC in infants is higher (3.2%) than in adults (2.0%).","topic":"Paediatric Anaesthesia","difficulty":"Medium","ref":"APAGBI Guidelines"},{"q":"A 4-year-old child weighing 18kg requires fluid resuscitation for dehydration. The initial IV fluid bolus is:","options":["50ml 0.9% normal saline","90ml Hartmann's solution (5ml/kg)","180ml Hartmann's solution (10ml/kg)","360ml (20ml/kg)"],"correct":3,"explanation":"Fluid resuscitation in children: 10-20ml/kg isotonic crystalloid (0.9% NaCl or Hartmann's) IV bolus, repeated as needed. For moderate-severe dehydration or shock: 20ml/kg = 18 x 20 = 360ml. Reassess after each bolus. Avoid dextrose-containing solutions for resuscitation (risk of hyponatraemia). NICE UK recommends 10ml/kg boluses, titrated.","topic":"Paediatric Anaesthesia","difficulty":"Medium","ref":"APLS / NICE Guidelines"},{"q":"Pyloric stenosis presents at 4-6 weeks of life with projectile vomiting. The metabolic abnormality is:","options":["Hyperchloraemic metabolic acidosis","Hypochloraemic hypokalaemic metabolic alkalosis","Respiratory acidosis","Hypernatraemic dehydration"],"correct":1,"explanation":"Pyloric stenosis: loss of HCl in gastric vomit causes hypochloraemic metabolic alkalosis. Hypokalaemia occurs as kidneys conserve Na+/H+ at expense of K+. Classic: pH↑, HCO3↑, K↓, Cl↓. Must correct electrolytes BEFORE surgery — correct K+ first, then Cl-. Surgery is never an emergency.","topic":"Paediatric Anaesthesia","difficulty":"Hard","ref":"APAGBI / Great Ormond Street Protocols"},{"q":"In neonatal anaesthesia, which monitoring parameter is MOST critical to prevent retinopathy of prematurity?","options":["End-tidal CO2","SpO2 maintained at 91-95%","Blood glucose","Temperature"],"correct":1,"explanation":"In preterm neonates, hyperoxia (SpO2 >95%) causes retinal vessel vasoconstriction and retinopathy of prematurity (ROP) — a leading cause of blindness. Target SpO2 91-95% in premature infants during anaesthesia. SpO2 <88% also dangerous (risk of hypoxic injury). Careful O2 titration is mandatory.","topic":"Paediatric Anaesthesia","difficulty":"Hard","ref":"APAGBI / AAP Neonatal Guidelines"},{"q":"Emergence agitation is most commonly seen after which agent?","options":["Propofol","Sevoflurane","Fentanyl","Midazolam"],"correct":1,"explanation":"Emergence agitation (EA) is most common with sevoflurane, occurring in 10-80% of paediatric patients. Characterised by inconsolable crying, thrashing, disorientation during recovery. Risk factors: age 2-6 years, ENT surgery, painful procedures. Prevention: fentanyl, dexmedetomidine, midazolam, propofol at end of case, adequate analgesia.","topic":"Paediatric Anaesthesia","difficulty":"Easy","ref":"APAGBI Guidelines"},{"q":"Aortocaval compression in pregnancy is relieved by:","options":["Trendelenburg position","15-degree left lateral tilt or full left lateral position","Head-up position","Right lateral tilt"],"correct":1,"explanation":"From 20 weeks gestation, the gravid uterus compresses the aorta and IVC in the supine position, reducing cardiac output by up to 30% (supine hypotensive syndrome). Relief: left lateral tilt of 15 degrees (wedge under right hip) or full left lateral position. This is mandatory during anaesthesia and CPR in pregnancy.","topic":"Obstetric Anaesthesia","difficulty":"Easy","ref":"OAA Guidelines 2023"},{"q":"Pre-eclampsia is defined as:","options":["Hypertension alone after 20 weeks","Hypertension >140/90 after 20 weeks plus significant proteinuria or end-organ dysfunction","Any hypertension in pregnancy","Hypertension before 20 weeks gestation"],"correct":1,"explanation":"Pre-eclampsia: new-onset hypertension (≥140/90 mmHg) after 20 weeks of gestation PLUS proteinuria (≥300mg/24h or PCR ≥30mg/mmol) OR end-organ dysfunction (renal, liver, neurological, haematological, uteroplacental). Hypertension alone is gestational hypertension. Before 20 weeks = chronic hypertension.","topic":"Obstetric Anaesthesia","difficulty":"Medium","ref":"ISSHP / NICE Hypertension in Pregnancy Guidelines"},{"q":"The drug of choice for treating severe hypertension in pre-eclampsia acutely is:","options":["Nifedipine oral only","IV labetalol or hydralazine or oral nifedipine","IV sodium nitroprusside","IV GTN infusion"],"correct":1,"explanation":"Acute severe hypertension in pre-eclampsia (>160/110): IV labetalol (50mg bolus, infusion), IV hydralazine (5-10mg boluses), or oral nifedipine (10mg, repeat). Target systolic 140-155, diastolic 90-105 (avoid aggressive reduction — compromises placental flow). Sodium nitroprusside is last resort due to fetal cyanide toxicity.","topic":"Obstetric Anaesthesia","difficulty":"Hard","ref":"NICE / Magpie Trial Guidelines"},{"q":"MgSO4 is given in severe pre-eclampsia to prevent:","options":["Hypertension","Eclamptic seizures","Fetal bradycardia","Pulmonary oedema"],"correct":1,"explanation":"Magnesium sulphate (MgSO4) is the anticonvulsant of choice for preventing and treating eclamptic seizures (not antihypertensive). Magpie trial: 58% reduction in risk of eclampsia. Loading dose 4g IV over 15 min, then 1g/hr. Monitor: respiratory rate >12, urine output >25ml/hr, patellar reflexes (lost first in toxicity). Antidote: calcium gluconate.","topic":"Obstetric Anaesthesia","difficulty":"Medium","ref":"Magpie Trial / NICE Guidelines"},{"q":"After delivery in massive obstetric haemorrhage (PPH), first-line uterotonic is:","options":["Ergometrine 0.5mg IM","Oxytocin 5-10 units IV slow bolus","Misoprostol 800mcg sublingual","Carboprost 0.25mg IM"],"correct":1,"explanation":"Oxytocin (Syntocinon) 5-10 units IV slow bolus (over 1-2 min to avoid hypotension) is first-line for prevention and treatment of PPH in all patients. Ergometrine contraindicated in hypertension. Carboprost (Hemabate) contraindicated in asthma. If oxytocin fails: add ergometrine, misoprostol, carboprost. Tranexamic acid given within 3 hours.","topic":"Obstetric Anaesthesia","difficulty":"Medium","ref":"WHO PPH Guidelines 2023"},{"q":"General anaesthesia for emergency LSCS — the MAIN risk is:","options":["Awareness under anaesthesia","Failed intubation and aspiration","Neonatal depression","Uterine atony"],"correct":1,"explanation":"GA for obstetric cases carries the highest risk of: failed intubation (8x higher in obstetric population due to oedema, weight gain, short neck, full dentition, friable tissues, Mallampati change in pregnancy) AND aspiration (full stomach, increased gastric acid, delayed emptying, reduced lower oesophageal sphincter tone). Always RSI with cricoid pressure.","topic":"Obstetric Anaesthesia","difficulty":"Hard","ref":"AIDAA / OAA Difficult Airway Guidelines"},{"q":"Which drug crosses the placenta and is used for fetal arrhythmia treatment?","options":["Adenosine","Digoxin","Amiodarone","Sotalol"],"correct":1,"explanation":"Digoxin crosses the placenta effectively and is used for transplacental treatment of fetal supraventricular tachycardia. It slows AV conduction. Flecainide and sotalol are alternatives. Amiodarone is avoided (fetal thyroid effects). Understanding placental drug transfer is important for obstetric anaesthesia and neonatology.","topic":"Obstetric Anaesthesia","difficulty":"Hard","ref":"ESC Cardiovascular Disease in Pregnancy Guidelines"},{"q":"Neonatal resuscitation: an infant born at 38 weeks has HR 60 bpm and is not breathing despite drying, stimulation, and 30 seconds of positive pressure ventilation. The next step is:","options":["Continue PPV only","Start cardiac compressions at 3:1 ratio with PPV","Give adrenaline immediately","Intubate and then reassess"],"correct":1,"explanation":"NLS algorithm: if HR <60 despite 30 seconds of effective PPV — start chest compressions. Neonatal ratio: 3 compressions : 1 ventilation (3:1) at rate of 90 compressions + 30 breaths per minute. Consider intubation for more effective ventilation. If HR still <60 after compressions + PPV — IV/IO adrenaline 0.01-0.03mg/kg.","topic":"Obstetric Anaesthesia","difficulty":"Medium","ref":"NLS / RCOG Newborn Resuscitation Guidelines"},{"q":"The anaesthesia machine pre-use checklist (AAGBI) must be completed:","options":["Weekly","Before each operating list","Before each individual patient","Only when a new machine is installed"],"correct":1,"explanation":"Full anaesthesia machine check per AAGBI/AASA guidelines should be performed before each operating list (or after any maintenance/change). A brief check of critical components should be done between patients. Never assume a machine is safe — equipment failure is responsible for significant preventable anaesthetic morbidity.","topic":"Equipment & Monitoring","difficulty":"Easy","ref":"AAGBI Anaesthesia Machine Guidelines 2012"},{"q":"The Mapleson D circuit (Bain circuit) is suitable for:","options":["Spontaneous ventilation in adults only","Controlled ventilation in adults — fresh gas flow 70ml/kg/min","Paediatric spontaneous breathing","Both controlled and spontaneous ventilation equally"],"correct":1,"explanation":"Bain circuit (Mapleson D/modified): for controlled ventilation in adults, fresh gas flow of 70ml/kg/min prevents rebreathing. For spontaneous ventilation, much higher flows needed (200ml/kg/min) making it inefficient. Mapleson A (Magill) is most efficient for spontaneous ventilation. Jackson-Rees (Mapleson F) for paediatrics.","topic":"Equipment & Monitoring","difficulty":"Hard","ref":"Miller's Anaesthesia 9th Ed"},{"q":"SpO2 reading may be falsely HIGH in:","options":["Carbon monoxide poisoning","Methaemoglobinaemia","Severe anaemia","Nail varnish"],"correct":0,"explanation":"CO poisoning: carboxyhaemoglobin absorbs light at same wavelength as oxyhaemoglobin — pulse oximeter reads falsely HIGH (98-100%) despite severe CO poisoning. Methaemoglobinaemia drives SpO2 towards 85% regardless of true saturation. Nail varnish (especially dark) falsely LOWERS reading. Severe anaemia reduces accuracy.","topic":"Equipment & Monitoring","difficulty":"Hard","ref":"Miller's Anaesthesia 9th Ed"},{"q":"Train-of-four (TOF) monitoring: a TOF ratio of 0.9 indicates:","options":["Complete neuromuscular blockade","Adequate recovery of neuromuscular function for extubation","Deep block — only 1-2 twitches","Moderate block"],"correct":1,"explanation":"TOF ratio ≥0.9 is the threshold for adequate neuromuscular recovery before extubation — correlates with return of pharyngeal function, ability to maintain airway, and protect against aspiration. TOF 0 = complete block. TOF count 1-2 = deep block. TOF count 3-4 but ratio <0.9 = residual block. Quantitative monitoring is gold standard.","topic":"Equipment & Monitoring","difficulty":"Medium","ref":"AIDAA / ESA Neuromuscular Monitoring Guidelines"},{"q":"The BIS (Bispectral Index) value associated with an appropriate depth of general anaesthesia is:","options":["80-100","60-80","40-60","Below 20"],"correct":2,"explanation":"BIS values: 100 = fully awake, 80-100 = sedated/responsive, 60-80 = light anaesthesia (risk of awareness), 40-60 = appropriate GA depth, 20-40 = deep anaesthesia, 0 = electrical silence (burst suppression). Target 40-60 for GA. Values >60 during surgery carry risk of awareness. Below 40 suggests over-anaesthesia.","topic":"Equipment & Monitoring","difficulty":"Easy","ref":"Miller's Anaesthesia 9th Ed"},{"q":"A circle breathing system (rebreathing circuit) requires a CO2 absorber because:","options":["To remove nitrogen from the circuit","To prevent rebreathing of expired CO2","To dry the inspired gases","To remove anaesthetic vapour"],"correct":1,"explanation":"In a circle system, exhaled gas passes through CO2 absorbent (soda lime or Baralyme) which chemically removes CO2, allowing the rest of the exhaled gas (including anaesthetic vapour and O2) to be recirculated. This conserves volatile agent and humidifies gas. The reaction is exothermic — a cool absorber indicates exhaustion.","topic":"Equipment & Monitoring","difficulty":"Easy","ref":"Miller's Anaesthesia 9th Ed"},{"q":"Which type of nerve stimulator pattern is used to detect residual neuromuscular block most sensitively?","options":["Single twitch","Train-of-four","Double burst stimulation (DBS)","Tetanic stimulation"],"correct":2,"explanation":"Double Burst Stimulation (DBS) — two short bursts of 50Hz tetanic stimulation — is most sensitive for clinically detecting residual block by FEEL (manual palpation). Fade between the two bursts indicates residual block when TOF count is 4 but ratio <0.9. Quantitative acceleromyography is more accurate but DBS is more sensitive than TOF for manual assessment.","topic":"Equipment & Monitoring","difficulty":"Hard","ref":"ESA Neuromuscular Monitoring Consensus 2020"},{"q":"Invasive blood pressure monitoring via arterial line shows 'damping' of the waveform. This means:","options":["Blood pressure is genuinely falling","Air bubble, clot, or kink in the line is attenuating the signal","The patient is in sinus bradycardia","The transducer needs recalibration"],"correct":1,"explanation":"Damped arterial waveform (low amplitude, loss of dicrotic notch, flattened appearance) indicates a technical problem: air bubble in line, blood clot in catheter/tubing, kinking, or loose connection — NOT true hypotension. Flush the line. If damping persists, replace catheter. Always check with NIBP to confirm clinical BP.","topic":"Equipment & Monitoring","difficulty":"Medium","ref":"Miller's Anaesthesia 9th Ed"},{"q":"Monroe-Kellie doctrine states that:","options":["ICP is always proportional to blood pressure","The skull is a fixed volume — increase in one component must be compensated by decrease in another","CSF production stops when ICP rises","Brain volume is fixed regardless of disease"],"correct":1,"explanation":"Monroe-Kellie doctrine: The cranial vault has a fixed volume containing brain (80%), blood (12%), and CSF (8%). An increase in any one compartment (e.g., haematoma, oedema) must be compensated by reduction in others (CSF displacement, venous compression). When compensation is exhausted, ICP rises exponentially — 'decompensation'.","topic":"Neuro Anaesthesia","difficulty":"Easy","ref":"Miller's Anaesthesia 9th Ed"},{"q":"Cerebral perfusion pressure (CPP) is:","options":["Mean arterial pressure + ICP","Mean arterial pressure - ICP","Systolic BP - ICP","Diastolic BP - ICP"],"correct":1,"explanation":"CPP = MAP - ICP (or MAP - CVP, whichever is higher). Normal CPP is 60-80 mmHg. Brain Trauma Foundation targets CPP 60-70 mmHg in TBI. Below 50 mmHg causes ischaemia. Maintaining adequate MAP is critical — if ICP rises to 20 mmHg, MAP must be ≥80 mmHg to maintain CPP ≥60.","topic":"Neuro Anaesthesia","difficulty":"Easy","ref":"Brain Trauma Foundation Guidelines 2023"},{"q":"Cerebral autoregulation maintains constant CBF between which MAP values in a healthy individual?","options":["40-60 mmHg","50-150 mmHg","60-100 mmHg","20-180 mmHg"],"correct":1,"explanation":"Cerebral autoregulation maintains constant cerebral blood flow (CBF ~50 ml/100g/min) over a wide range of MAP: 50-150 mmHg. Outside this range, CBF becomes pressure-passive. In chronic hypertension, the autoregulatory curve shifts RIGHT — these patients need higher MAP to maintain adequate CBF. Impaired in TBI, stroke, SAH.","topic":"Neuro Anaesthesia","difficulty":"Medium","ref":"Miller's Anaesthesia 9th Ed"},{"q":"During craniotomy, the patient has sudden increase in airway pressure, BP rise, and bradycardia. The surgeon reports brain is 'tight'. Most likely cause is:","options":["Anaphylaxis","Acute intracranial hypertension — Cushing's response","Bronchospasm","Pneumothorax"],"correct":1,"explanation":"Cushing's response (triad): hypertension, bradycardia, and irregular respiration — indicates severely raised ICP with brainstem compression. Tight brain + Cushing's response = neurosurgical emergency. Immediate actions: increase FiO2, controlled hyperventilation (PaCO2 30-35 mmHg), mannitol 0.5-1g/kg, head up 30°, inform surgeon, check depth of anaesthesia.","topic":"Neuro Anaesthesia","difficulty":"Hard","ref":"Miller's Anaesthesia 9th Ed"},{"q":"Mannitol 1g/kg IV is given to reduce ICP. Its mechanism is:","options":["Increases cerebral vasoconstriction","Osmotic diuresis — draws water from brain tissue into intravascular space","Reduces CSF production","Increases renal excretion of sodium only"],"correct":1,"explanation":"Mannitol works by osmotic mechanisms: 1) Acute rheological effect — reduces blood viscosity, improves CBF and oxygen delivery (within minutes), 2) Osmotic diuresis — draws water from oedematous brain into blood (over 15-30 min). Dose: 0.25-1g/kg IV over 15-20 min. Monitor serum osmolarity — stop if >320 mOsm/L.","topic":"Neuro Anaesthesia","difficulty":"Medium","ref":"Brain Trauma Foundation Guidelines 2023"},{"q":"The 'steal' phenomenon in neurovascular surgery refers to:","options":["Anaesthetic agent stealing into the brain","Vasodilators causing blood flow to redirect away from ischaemic areas to normal brain","Hyperventilation stealing O2 from neurons","Autoregulation stealing blood from other organs"],"correct":1,"explanation":"Vascular steal: vasodilating agents (CO2, volatile anaesthetics at high concentrations, nitroprusside) dilate normal vessels, increasing their flow and potentially DIVERTING blood away from ischaemic areas (which have lost autoregulation and cannot vasodilate further). Inverse steal (Robin Hood): mild hyperventilation may direct flow toward ischaemic areas.","topic":"Neuro Anaesthesia","difficulty":"Hard","ref":"Miller's Anaesthesia 9th Ed"},{"q":"Sitting position for posterior fossa surgery carries which unique risk?","options":["Tension pneumothorax","Venous air embolism (VAE)","Brachial plexus injury","Optic nerve compression"],"correct":1,"explanation":"Venous air embolism is the primary risk in sitting position — open venous sinuses in the skull are above the heart, creating subatmospheric pressure that entrains air. Detection: ETCO2 falls (most sensitive non-invasive), transoesophageal echo (most sensitive overall), 'mill wheel' murmur on precordial Doppler. Treatment: Durant's manoeuvre (left lateral Trendelenburg), aspirate via CVP line.","topic":"Neuro Anaesthesia","difficulty":"Hard","ref":"Miller's Anaesthesia 9th Ed"},{"q":"Thiopentone given before rapid sequence intubation in a head-injured patient confers cerebral protection by:","options":["Increasing cerebral blood flow","Reducing CMRO2 and ICP","Providing direct neuroprotection at cellular level","Causing cerebral vasoconstriction only"],"correct":1,"explanation":"Barbiturates (thiopentone) reduce cerebral metabolic rate (CMRO2) by up to 50%, causing proportional reduction in CBF and ICP (flow-metabolism coupling). This provides a 'pharmacological coma' and reduces ischaemic damage in burst suppression. However propofol infusion is now more commonly used for this purpose in ICU. No proven long-term neuroprotection at cellular level.","topic":"Neuro Anaesthesia","difficulty":"Medium","ref":"Miller's Anaesthesia 9th Ed"},{"q":"Anaphylaxis under general anaesthesia — the MOST common trigger is:","options":["Volatile anaesthetic agents","Latex","Neuromuscular blocking agents","Blood transfusion"],"correct":2,"explanation":"NMBAs (neuromuscular blocking agents) are the most common cause of perioperative anaphylaxis (50-70% in some series), particularly succinylcholine and rocuronium. Latex is second most common. Antibiotics, NSAIDs, colloids, and dyes also implicated. Volatile agents very rarely cause true anaphylaxis (IgE-mediated).","topic":"Crisis Management","difficulty":"Medium","ref":"AAGBI / WAO Anaphylaxis Guidelines 2021"},{"q":"A patient develops sudden cardiac arrest during spinal anaesthesia for hip replacement. The MOST likely cause is:","options":["Cardiac tamponade","Massive pulmonary embolism","High spinal causing cardiorespiratory arrest","Myocardial infarction"],"correct":2,"explanation":"Cardiac arrest during high spinal: block above T4 causes sympathetic denervation of the heart (cardioaccelerator fibres T1-T4), profound bradycardia (Bezold-Jarisch reflex), hypotension, and respiratory arrest if diaphragm (C3-C5) is affected. Treatment: immediate CPR, IV adrenaline, intubation for respiratory support, left lateral tilt for aortocaval decompression.","topic":"Crisis Management","difficulty":"Hard","ref":"NAP5 / AAGBI Spinal Anaesthesia Guidelines"},{"q":"During anaesthesia, the patient suddenly develops increasing peak airway pressures, hypoxia, and haemodynamic instability. The circuit is intact and ETT is confirmed in trachea. MOST likely diagnosis:","options":["Laryngospasm","Endobronchial intubation causing tension pneumothorax or bronchospasm","Awareness under anaesthesia","Machine malfunction only"],"correct":1,"explanation":"Sudden increase in airway pressure + haemodynamic instability with confirmed ETT = think: bronchospasm, tension pneumothorax, endobronchial intubation (right main bronchus — listen to left side), kinked ETT. Systematic approach: disconnect and hand ventilate, auscultate, check ETT depth, consider needle decompression if tension pneumothorax suspected.","topic":"Crisis Management","difficulty":"Hard","ref":"AAGBI Crisis Management Guidelines"},{"q":"The reversal agent for benzodiazepine overdose is:","options":["Naloxone","Flumazenil","Physostigmine","Neostigmine"],"correct":1,"explanation":"Flumazenil (Anexate) is the specific competitive antagonist at GABA-A benzodiazepine binding site. Dose: 0.2mg IV every 60 seconds to maximum 1mg. Short half-life (1 hour) — resedation may occur, requiring repeat doses or infusion. Avoid in chronic benzodiazepine users (may precipitate seizures). Naloxone reverses opioids.","topic":"Crisis Management","difficulty":"Easy","ref":"Morgan & Mikhail 6th Ed"},{"q":"A patient receives a blood transfusion and develops fever 38.5°C, rigors, hypotension, and haemoglobinuria after 150ml. The MOST dangerous transfusion reaction is:","options":["Febrile non-haemolytic transfusion reaction","Acute haemolytic transfusion reaction (ABO incompatibility)","Allergic/anaphylactic reaction","Transfusion-related acute lung injury (TRALI)"],"correct":1,"explanation":"Acute haemolytic reaction (ABO incompatibility — most often clerical error) presents with fever, rigors, haemoglobinuria, DIC, renal failure, shock. Immediate action: STOP transfusion, maintain IV access, send blood bank sample and reaction bag, supportive care, monitor renal function. Can be rapidly fatal — prevention by strict identity checking.","topic":"Crisis Management","difficulty":"Hard","ref":"SHOT / BSH Transfusion Guidelines"},{"q":"During emergence from anaesthesia, a patient develops laryngospasm with complete airway obstruction. SpO2 falls to 78%. After jaw thrust and CPAP fails, the next step is:","options":["Wait and continue CPAP","Succinylcholine 0.5-1mg/kg IV immediately","Call for help and continue waiting","Insert nasopharyngeal airway only"],"correct":1,"explanation":"Complete laryngospasm with severe desaturation: if CPAP and Larson manoeuvre fail — succinylcholine 0.5-1mg/kg IV (or 4mg/kg IM if no IV access) to break spasm. Propofol 0.5mg/kg may break partial spasm. Do not delay — hypoxic cardiac arrest can occur rapidly. Have resuscitation equipment ready.","topic":"Crisis Management","difficulty":"Medium","ref":"AAGBI Airway Guidelines"},{"q":"Local anaesthetic systemic toxicity (LAST) — the cardiac manifestation includes:","options":["Sinus tachycardia only","Wide complex arrhythmias, ventricular tachycardia, cardiac arrest","Supraventricular tachycardia only","Bradycardia then asystole always"],"correct":1,"explanation":"LAST cardiovascular effects: early — hypertension, tachycardia (due to CNS excitation). Then: prolonged PR, wide QRS, ventricular arrhythmias (VT/VF), cardiac arrest. Bupivacaine is most cardiotoxic ('fast in, slow out' sodium channel blockade). Resuscitation may be prolonged — use 20% Intralipid 1.5ml/kg bolus + infusion. Continue CPR for at least 60 minutes.","topic":"Crisis Management","difficulty":"Hard","ref":"AAGBI LAST Guidelines 2023"},{"q":"Suspected malignant hyperthermia — which combination of clinical features confirms the diagnosis most strongly?","options":["Fever alone","Masseter spasm after succinylcholine","Rising ETCO2 + muscle rigidity + hyperthermia + metabolic acidosis","Tachycardia and hypertension only"],"correct":2,"explanation":"MH clinical triad: rapidly rising ETCO2 (earliest sign — CO2 production from uncontrolled metabolism), generalised muscle rigidity, and hyperthermia (temperature may rise 1-2°C every 5 min). Associated: metabolic and respiratory acidosis, hyperkalaemia, myoglobinuria, elevated CK. Masseter spasm alone is not diagnostic. MH Hotline India: +91 22 2495 0002.","topic":"Crisis Management","difficulty":"Medium","ref":"EMHG / MHAUS Guidelines 2020"},{"q":"During cardiac arrest under anaesthesia, chest compressions should achieve a depth of:","options":["2 cm","4-5 cm","5-6 cm","8 cm"],"correct":2,"explanation":"Adult CPR compression depth: 5-6 cm (approximately 2 inches). Rate: 100-120/min. Allow full chest recoil. Ratio: 30:2 if no advanced airway; continuous compressions with 10 breaths/min once intubated. Pause for defibrillation only. High-quality CPR is the most important determinant of survival — do not stop for minor interruptions.","topic":"Crisis Management","difficulty":"Easy","ref":"ERC / ILCOR Guidelines 2021"},{"q":"Suspected air embolism during neurosurgery in sitting position. The FIRST monitoring change is:","options":["Sudden hypotension","SpO2 drop","Decrease in ETCO2","Increase in airway pressure"],"correct":2,"explanation":"Venous air embolism (VAE) detection sequence: 1) ETCO2 falls first (dead space increases as gas obstructs pulmonary vessels), 2) Mill-wheel precordial murmur (Doppler — most sensitive non-invasive), 3) SpO2 falls, 4) Hypotension. ETCO2 monitor provides early warning. TEE is most sensitive overall. Actions: STOP air entry (bone wax, saline flood), Durant's manoeuvre, aspirate CVP, CPR if arrested.","topic":"Crisis Management","difficulty":"Hard","ref":"Miller's Anaesthesia 9th Ed"}];
+</script>
+<!-- ══ NEW FEATURES INJECTION ══ -->
+<style>
+.show-ans-btn {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  padding: 7px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+}
+.show-ans-btn:hover { border-color: var(--accent2); color: var(--accent2); }
+.show-ans-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.model-answer-bubble {
+  background: #0A1A2E;
+  border: 1px solid rgba(0,194,255,0.3);
+  border-radius: 11px;
+  padding: 16px 20px;
+  font-size: 0.84rem;
+  line-height: 1.75;
+  max-width: 96%;
+  align-self: flex-start;
+  white-space: pre-wrap;
+}
+.ma-header {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--accent);
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.step-feedback-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  padding: 14px 18px;
+  font-size: 0.84rem;
+  line-height: 1.65;
+}
+.step-label {
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--accent);
+  margin-bottom: 8px;
+}
+.scenario-update-card {
+  background: rgba(255,184,0,0.05);
+  border: 1px solid rgba(255,184,0,0.25);
+  border-radius: 11px;
+  padding: 14px 18px;
+  font-size: 0.88rem;
+  line-height: 1.65;
+}
+.scenario-update-label {
+  font-size: 0.6rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--warn);
+  margin-bottom: 6px;
+}
+
+/* Feedback float button */
+.fb-float { position: fixed; bottom: 24px; right: 24px; z-index: 999; display: flex; flex-direction: column; align-items: flex-end; gap: 10px; }
+.fb-main-btn { background: var(--accent2); color: #000; font-weight: 700; font-size: 0.82rem; border: none; border-radius: 50px; padding: 12px 20px; cursor: pointer; font-family: 'Inter', sans-serif; box-shadow: 0 4px 20px rgba(0,255,178,0.3); display: flex; align-items: center; gap: 8px; transition: all 0.2s; }
+.fb-menu { display: none; flex-direction: column; gap: 8px; align-items: flex-end; }
+.fb-menu.open { display: flex; }
+.fb-option { background: var(--surface); border: 1px solid var(--border); color: var(--text); font-size: 0.8rem; font-weight: 500; border-radius: 50px; padding: 10px 18px; cursor: pointer; font-family: 'Inter', sans-serif; text-decoration: none; display: flex; align-items: center; gap: 8px; transition: all 0.15s; box-shadow: 0 2px 12px rgba(0,0,0,0.3); white-space: nowrap; }
+.fb-option:hover { border-color: var(--accent); color: var(--accent); }
+</style>
+
+<!-- Feedback Float -->
+<div class="fb-float">
+  <div class="fb-menu" id="fbMenu">
+    <a class="fb-option" href="https://wa.me/919978677919?text=AnaesthesiaInsider%20Feedback%3A%20" target="_blank">💬 WhatsApp Feedback</a>
+  </div>
+  <button class="fb-main-btn" onclick="document.getElementById('fbMenu').classList.toggle('open')">💬 Feedback</button>
+</div>
+
+<script>
+// ══════════════════════════════════════
+// SHOW MODEL ANSWER
+// ══════════════════════════════════════
+async function showModelAnswer(context, panelId, btnId) {
+  var btn = document.getElementById(btnId);
+  if (!btn) return;
+  btn.disabled = true;
+  btn.textContent = '⏳ Loading...';
+
+  var sys = 'You are a senior DNB/MD anaesthesiology examiner in India with 20+ years of experience. ' +
+    'A junior doctor needs the COMPLETE ideal answer for this viva question or crisis management step. ' +
+    'Answer EXACTLY as you would say it in a real viva exam or teach it at the OT bedside. ' +
+    'Do not be brief — be thorough and educational. Format your response like this:\n\n' +
+    'IDEAL ANSWER:\n' +
+    '[Complete 4-6 sentence answer using proper medical terminology, exactly as an examiner would award full marks for]\n\n' +
+    'KEY POINTS EXAMINER WANTS TO HEAR:\n' +
+    '1. [Key point]\n' +
+    '2. [Key point]\n' +
+    '3. [Key point]\n' +
+    '4. [Key point if applicable]\n\n' +
+    'COMMON MISTAKES CANDIDATES MAKE:\n' +
+    '[What most candidates get wrong — be specific]\n\n' +
+    'CLINICAL PEARL:\n' +
+    '[One memorable tip that makes this topic stick]\n\n' +
+    'REFERENCE:\n' +
+    '[Specific reference: e.g. AIDAA 2025, DAS 2025, Miller 9th Ed Ch X, ASA 2022]';
+
+  try {
+    var reply = await callClaude(sys, [{role:'user', content:'Question or situation: ' + context + '\n\nGive the complete ideal model answer an examiner would award full marks for.'}]);
+    var panel = document.getElementById(panelId);
+    if (!panel) return;
+    var d = document.createElement('div');
+    d.className = 'model-answer-bubble';
+    d.innerHTML = '<div class="ma-header">💡 Model Answer — What Earns Full Marks</div>' + ft(reply);
+    panel.appendChild(d);
+    scrollB(panelId);
+    btn.textContent = '✓ Answer Shown';
+  } catch(e) {
+    btn.disabled = false;
+    btn.textContent = '💡 Show Model Answer';
+    var panel = document.getElementById(panelId);
+    if (panel) {
+      var d = document.createElement('div');
+      d.className = 'model-answer-bubble';
+      d.style.borderColor = 'rgba(255,79,79,0.3)';
+      d.innerHTML = '<div class="ma-header" style="color:var(--crisis)">⚠️ Error</div>' + (e.message || 'Could not load. Try again.');
+      panel.appendChild(d);
+      scrollB(panelId);
+    }
+  }
+}
+
+// ══════════════════════════════════════
+// CRISIS — STEP BY STEP (OVERRIDES)
+// ══════════════════════════════════════
+var _crisisAnsBtnCount = 0;
+
+// Override vivaAppendMsg to add Show Answer button
+var _origVivaAppendMsg = window.vivaAppendMsg;
+if (typeof vivaAppendMsg !== 'undefined') {
+  var _vivaBtnCount = 0;
+  window.vivaAppendMsg = function(role, text) {
+    // call original
+    var msgs = document.getElementById('vivaMessages');
+    var d = document.createElement('div');
+    d.className = 'msg ' + role;
+    d.innerHTML = '<div class="msg-role">' + (role==='examiner'?'🩺 Examiner':'👨\u200d⚕️ You') + '</div><div class="msg-bubble">' + ft(text) + '</div>';
+    msgs.appendChild(d);
+    if (role === 'examiner') {
+      _vivaBtnCount++;
+      var bid = 'vab' + _vivaBtnCount;
+      var btn = document.createElement('button');
+      btn.className = 'show-ans-btn';
+      btn.id = bid;
+      btn.textContent = '💡 Show Model Answer';
+      btn.setAttribute('data-ctx', text.substring(0, 400));
+      btn.addEventListener('click', function() {
+        showModelAnswer(this.getAttribute('data-ctx'), 'vivaMessages', this.id);
+      });
+      msgs.appendChild(btn);
+    }
+    scrollB('vivaMessages');
+  };
+}
+
+
+
+// ══════════════════════════════════════
+// MCQ — RELIABLE ONE-AT-A-TIME
+// ══════════════════════════════════════
+window.mcqStart = async function() {
+  mcqQs = [];
+  mcqIdx = 0;
+  mcqCorrect = 0;
+  mcqWrongTopics = {};
+  mcqAnswered = false;
+
+  var topic = document.getElementById('mcqTopic').value;
+  var diff  = document.getElementById('mcqDiff').value;
+  var count = parseInt(document.getElementById('mcqCount').value);
+
+  document.getElementById('mcqStartBtn').disabled = true;
+  document.getElementById('mcqContent').innerHTML =
+    '<div class="loading-card"><div class="ldots"><span></span><span></span><span></span></div>' +
+    '<div>Loading questions...</div></div>';
+
+  // ── BANK-FIRST: Pull from built-in question bank (zero API calls) ──
+  var pool = QUESTION_BANK.filter(function(q) {
+    var topicMatch = topic === 'Mixed — All Topics' || q.topic === topic;
+    var diffMatch  = diff === 'Mixed' || q.difficulty === diff;
+    return topicMatch && diffMatch;
+  });
+
+  // Shuffle the pool for variety
+  for (var i = pool.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var tmp = pool[i]; pool[i] = pool[j]; pool[j] = tmp;
+  }
+
+  // Take requested count from bank
+  mcqQs = pool.slice(0, count);
+
+  // If bank doesn't have enough — top up with AI (only if API key exists)
+  var needed = count - mcqQs.length;
+  if (needed > 0 && API_KEY) {
+    document.getElementById('mcqContent').innerHTML =
+      '<div class="loading-card"><div class="ldots"><span></span><span></span><span></span></div>' +
+      '<div id="mcqProg">Bank has ' + window.mcqQs.length + ' questions. Generating ' + needed + ' more with AI...</div></div>';
+
+    for (var ai = 0; ai < needed; ai++) {
+      var prog2 = document.getElementById('mcqProg');
+      if (prog2) prog2.textContent = 'Generating extra question ' + (ai+1) + ' of ' + needed + '...';
+      var d2 = diff === 'Mixed' ? ['Easy','Medium','Hard'][ai % 3] : diff;
+      var q2 = null;
+      for (var attempt2 = 0; attempt2 < 2 && !q2; attempt2++) {
+        try {
+          var reply2 = await callClaude(
+            'You are a DNB/MD anaesthesiology MCQ examiner in India. Generate ONE MCQ question. Topic: ' + topic + '. Difficulty: ' + d2 + '. Respond using ONLY this format:\nQ: [question]\nA: [option]\nB: [option]\nC: [option]\nD: [option]\nANS: [A|B|C|D]\nEXP: [explanation]\nTOP: [subtopic]\nREF: [reference]\nStart directly with Q:',
+            [{role:'user', content:'Generate question on ' + topic + '. Difficulty: ' + d2 + '. Start with Q:'}]
+          );
+          q2 = parseMCQSafe(reply2, d2, topic);
+          if (!q2 && attempt2 < 1) await new Promise(function(r){setTimeout(r,1500);});
+        } catch(e2) {
+          if (attempt2 < 1) await new Promise(function(r){setTimeout(r,2000);});
+        }
+      }
+      if (q2) mcqQs.push(q2);
+      if (ai < needed - 1) await new Promise(function(r){setTimeout(r,500);});
+    }
+  }
+
+  document.getElementById('mcqStartBtn').disabled = false;
+
+  if (mcqQs.length === 0) {
+    document.getElementById('mcqContent').innerHTML =
+      '<div class="loading-card" style="border-color:rgba(255,79,79,0.3)">' +
+      '<div style="font-size:1.5rem">⚠️</div>' +
+      '<div style="color:var(--crisis)">No questions available for this selection.<br>Try Mixed topic or Mixed difficulty.</div></div>';
+    return;
+  }
+
+  mcqShowQ();
+};
+
+function parseMCQSafe(raw, diff, topic) {
+  try {
+    if (!raw || raw.length < 20) { console.log('MCQ parse: raw too short', raw); return null; }
+    var text = raw.trim();
+
+    // Split into lines and find each labeled line independently — far more forgiving than lookahead regex
+    var lines = text.split(/\n/);
+    var qLines = [];
+    var optA = null, optB = null, optC = null, optD = null, ansLetter = null, expText = null, topText = null, refText = null;
+    var mode = 'q';
+
+    for (var li = 0; li < lines.length; li++) {
+      var line = lines[li];
+      var trimmed = line.replace(/\*+/g,'').trim();
+      var mA = trimmed.match(/^A[.:\)]\s*(.+)/i);
+      var mB = trimmed.match(/^B[.:\)]\s*(.+)/i);
+      var mC = trimmed.match(/^C[.:\)]\s*(.+)/i);
+      var mD = trimmed.match(/^D[.:\)]\s*(.+)/i);
+      var mAns = trimmed.match(/^ANS(?:WER)?[.:]\s*([ABCD])/i) || trimmed.match(/^Correct(?:\s*Answer)?[.:]\s*([ABCD])/i);
+      var mExp = trimmed.match(/^EXP(?:LANATION)?[.:]\s*(.+)/i);
+      var mTop = trimmed.match(/^TOP(?:IC)?[.:]\s*(.+)/i);
+      var mRef = trimmed.match(/^REF(?:ERENCE)?[.:]\s*(.+)/i);
+      var mQ   = trimmed.match(/^Q(?:UESTION)?[.:]\s*(.+)/i);
+
+      if (mQ) { qLines = [mQ[1]]; mode = 'q'; continue; }
+      if (mA) { optA = mA[1]; mode = null; continue; }
+      if (mB) { optB = mB[1]; mode = null; continue; }
+      if (mC) { optC = mC[1]; mode = null; continue; }
+      if (mD) { optD = mD[1]; mode = null; continue; }
+      if (mAns) { ansLetter = mAns[1].toUpperCase(); mode = null; continue; }
+      if (mExp) { expText = mExp[1]; mode = 'exp'; continue; }
+      if (mTop) { topText = mTop[1]; mode = null; continue; }
+      if (mRef) { refText = mRef[1]; mode = null; continue; }
+
+      // Continuation lines (e.g. question or explanation spanning multiple lines)
+      if (mode === 'q' && trimmed.length > 0) qLines.push(trimmed);
+      else if (mode === 'exp' && trimmed.length > 0) expText = (expText || 'AQ.Ab8RN6IorSHDCVqXaEQg79uVsPO0PoBCUA8KNBUK0wyqnLjjiQ') + ' ' + trimmed;
+    }
+
+    var qText = qLines.join(' ').trim();
+
+    if (!qText || !optA || !optB || !optC || !optD || !ansLetter) {
+      console.log('MCQ parse FAILED. Got:', {q:qText, A:optA, B:optB, C:optC, D:optD, ans:ansLetter});
+      console.log('Raw response was:', text);
+      return null;
+    }
+
+    var map = {'A':0,'B':1,'C':2,'D':3};
+    return {
+      q:           qText,
+      options:     [optA.trim(), optB.trim(), optC.trim(), optD.trim()],
+      correct:     (map[ansLetter] !== undefined) ? map[ansLetter] : 0,
+      explanation: expText ? expText.trim() : 'Refer to standard anaesthesiology references.',
+      topic:       topText ? topText.trim() : topic,
+      difficulty:  diff,
+      ref:         refText ? refText.trim() : "Miller's Anaesthesia 9th Ed"
+    };
+  } catch(e) { console.log('MCQ parse exception:', e.message); return null; }
+}
+
+// ══════════════════════════════════════
+// TIVA CALCULATOR FIX
+// ══════════════════════════════════════
+var TIVA_DB = {
+  pi: {name:'Propofol Induction',   unit:'mcg/kg/min', lo:100,  hi:200,  cUnit:'mg/ml',  defC:10,  note:'1% solution = 10mg/ml. Inject over 20-40s. Reduce 30% in elderly.'},
+  pm: {name:'Propofol Maintenance', unit:'mcg/kg/min', lo:50,   hi:150,  cUnit:'mg/ml',  defC:10,  note:'Titrate to BIS 40-60. Typical maintenance 100mcg/kg/min.'},
+  ps: {name:'Propofol Sedation',    unit:'mcg/kg/min', lo:5,    hi:50,   cUnit:'mg/ml',  defC:10,  note:'Start at 5-10mcg/kg/min. Target Ramsay 2-3.'},
+  rm: {name:'Remifentanil',         unit:'mcg/kg/min', lo:0.05, hi:0.5,  cUnit:'mcg/ml', defC:50,  note:'5mg in 100ml NS = 50mcg/ml. Rapid offset 3-5 min. Context insensitive.'},
+  dx: {name:'Dexmedetomidine',      unit:'mcg/kg/hr',  lo:0.2,  hi:0.7,  cUnit:'mcg/ml', defC:4,   note:'200mcg in 50ml NS = 4mcg/ml. Loading: 0.5-1mcg/kg over 10 min.'},
+  kt: {name:'Ketamine Infusion',    unit:'mg/kg/hr',   lo:0.1,  hi:0.5,  cUnit:'mg/ml',  defC:1,   note:'500mg in 500ml NS = 1mg/ml. Sub-anesthetic analgesia dose.'}
+};
+
+window.calcTIVA = function() {
+  var k    = document.getElementById('tivaDrug').value;
+  var conc = parseFloat(document.getElementById('tivaConc').value) || TIVA_DB[k].defC;
+  var vol  = parseFloat(document.getElementById('tivaVol').value)  || 50;
+  var drug = TIVA_DB[k];
+  var w    = window.doseWeight || 70;
+
+  var totalDrug = conc * vol;
+  var concForCalc = (drug.cUnit === 'mg/ml') ? conc * 1000 : conc; // always in mcg/ml or mg/ml
+
+  var loRate, hiRate;
+  if (drug.unit === 'mcg/kg/min') {
+    loRate = (drug.lo * w * 60) / concForCalc;
+    hiRate = (drug.hi * w * 60) / concForCalc;
+  } else if (drug.unit === 'mcg/kg/hr') {
+    loRate = (drug.lo * w) / concForCalc;
+    hiRate = (drug.hi * w) / concForCalc;
+  } else {
+    // mg/kg/hr — ketamine
+    var concMgMl = conc;
+    loRate = (drug.lo * w) / concMgMl;
+    hiRate = (drug.hi * w) / concMgMl;
+  }
+
+  var durMin = (vol / loRate) * 60;
+  var durMax = (vol / hiRate) * 60;
+
+  function fmtDur(mins) {
+    if (isNaN(mins) || !isFinite(mins)) return 'N/A';
+    if (mins >= 60) return Math.floor(mins/60) + 'h ' + Math.round(mins%60) + 'min';
+    return Math.round(mins) + ' min';
+  }
+
+  var totalDisplay = totalDrug.toFixed(0) + ' ' + (drug.cUnit === 'mg/ml' ? 'mg' : 'mcg');
+
+  document.getElementById('tivaRes').innerHTML =
+    '<div class="trb"><div class="tl">Syringe Total</div><div class="tv">' + totalDisplay + '</div><div class="tu">' + conc + ' ' + drug.cUnit + ' x ' + vol + ' ml</div></div>' +
+    '<div class="trb"><div class="tl">Dose Range</div><div class="tv">' + drug.lo + ' - ' + drug.hi + '</div><div class="tu">' + drug.unit + '</div></div>' +
+    '<div class="trb"><div class="tl">Rate Range</div><div class="tv">' + loRate.toFixed(1) + ' - ' + hiRate.toFixed(1) + '</div><div class="tu">ml/hr for ' + w + 'kg</div></div>' +
+    '<div class="trb"><div class="tl">Duration at Min Rate</div><div class="tv">' + fmtDur(durMin) + '</div><div class="tu">at ' + loRate.toFixed(1) + ' ml/hr</div></div>' +
+    '<div class="trb"><div class="tl">Duration at Max Rate</div><div class="tv">' + fmtDur(durMax) + '</div><div class="tu">at ' + hiRate.toFixed(1) + ' ml/hr</div></div>' +
+    '<div class="trb" style="grid-column:1/-1;background:rgba(0,194,255,0.04);border-color:rgba(0,194,255,0.2)"><div class="tl" style="color:var(--accent)">Clinical Note</div><div style="font-size:0.78rem;color:var(--muted);margin-top:3px">' + drug.note + '</div></div>';
+};
+
+// Update TIVA dropdown to include ketamine
+(function() {
+  var sel = document.getElementById('tivaDrug');
+  if (sel && !document.querySelector('#tivaDrug option[value="kt"]')) {
+    var opt = document.createElement('option');
+    opt.value = 'kt'; opt.textContent = 'Ketamine Infusion';
+    sel.appendChild(opt);
+  }
+})();
+
+// Recalc on page load
+if (typeof doseWeight !== 'undefined') calcTIVA();
+
+
+</script>
+
+</body>
+</html>
